@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Anak;
+
+class OrtuController extends Controller
+{
+    public function landing()
+    {
+        return view('landing');
+    }
+
+    public function checkToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string|trim',
+        ]);
+
+        $token = str_replace(' ', '', strtoupper($request->token));
+
+        $anak = Anak::withoutGlobalScope('posyandu_scope')
+            ->where('token_akses', $token)
+            ->first();
+
+        if (!$anak) {
+            return back()->withInput()->with('error', 'Kode token anak tidak ditemukan. Silakan periksa kembali token unik dari Posyandu.');
+        }
+
+        return redirect()->route('ortu.show', ['token' => $anak->token_akses]);
+    }
+
+    public function show($token)
+    {
+        $anak = Anak::withoutGlobalScope('posyandu_scope')
+            ->where('token_akses', $token)
+            ->with(['posyandu', 'pengukurans' => function ($q) {
+                $q->orderBy('tanggal_ukur', 'asc');
+            }, 'hasilSawTerakhir'])
+            ->firstOrFail();
+
+        $pengukurans = $anak->pengukurans;
+        $hasilSaw = $anak->hasilSawTerakhir;
+
+        // Formulate layman explanation for stunting & weight status
+        $laymanStatus = $this->getLaymanStatus($hasilSaw, $pengukurans->last());
+
+        return view('ortu.show', compact('anak', 'pengukurans', 'hasilSaw', 'laymanStatus'));
+    }
+
+    private function getLaymanStatus($hasilSaw, $pengukuranTerakhir)
+    {
+        if (!$hasilSaw || !$pengukuranTerakhir) {
+            return [
+                'badge_color' => 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+                'title' => 'Belum Ada Perhitungan SAW',
+                'description' => 'Balita ini baru terdaftar dan belum memiliki data pengukuran yang lengkap.',
+                'tips' => [
+                    'Bawa balita ke Posyandu rutin setiap bulan.',
+                    'Pastikan balita mendapatkan ASI Eksklusif dan MPASI bergizi seimbang.'
+                ]
+            ];
+        }
+
+        $kategori = $hasilSaw->kategori_risiko;
+        $zTbu = $hasilSaw->z_tbu;
+
+        if ($kategori === 'Sangat Tinggi') {
+            return [
+                'badge_color' => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+                'badge_text' => 'Perhatian Khusus Stunting',
+                'title' => 'Memerlukan Perhatian dan Pendampingan Gizi Segera',
+                'description' => 'Tinggi badan si kecil berada di bawah rata-rata pertumbuhan anak seusianya. Perlu konsultasi lebih lanjut dengan Bidan Desa dan Petugas Puskesmas.',
+                'tips' => [
+                    'Konsultasikan dengan Bidan Desa / Dokter di Puskesmas terdekat.',
+                    'Berikan makanan tinggi protein hewani (telur, ikan, daging ayam/sapi) setiap hari.',
+                    'Pastikan imunisasi lengkap dan berikan vitamin A sesuai jadwal Posyandu.'
+                ]
+            ];
+        } elseif ($kategori === 'Tinggi') {
+            return [
+                'badge_color' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                'badge_text' => 'Risiko Stunting Sedang - Perlu Pengawasan',
+                'title' => 'Pertumbuhan Tinggi Perlu Dioptimalkan',
+                'description' => 'Kenaikan tinggi/berat badan si kecil perlu dipantau secara ketat agar tidak tertinggal dari grafik tumbuh kembang ideal.',
+                'tips' => [
+                    'Variasikan MPASI dengan asupan protein dan kalori yang cukup.',
+                    'Pantau terus penimbangan berat dan tinggi badan di Posyandu bulan depan.',
+                    'Menjaga kebersihan lingkungan dan sanitasi air minum rumah tangga.'
+                ]
+            ];
+        } elseif ($kategori === 'Sedang') {
+            return [
+                'badge_color' => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+                'badge_text' => 'Pertumbuhan Cukup Baik',
+                'title' => 'Tumbuh Kembang Berada pada Jalur Cukup Baik',
+                'description' => 'Pertumbuhan anak relatif stabil, terus pertahankan asupan nutrisi seimbang dan tingkatkan proteksi kesehatan.',
+                'tips' => [
+                    'Lanjutkan pemberian makanan bergizi seimbang 3 kali sehari.',
+                    'Jaga pola tidur anak yang cukup dan aktifitas bermain yang sehat.'
+                ]
+            ];
+        } else {
+            return [
+                'badge_color' => 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+                'badge_text' => 'Pertumbuhan Optimal & Sehat',
+                'title' => 'Selamat! Si Kecil Tumbuh Optimal & Sehat',
+                'description' => 'Tinggi dan berat badan si kecil sesuai dengan grafik pertumbuhan anak sehat WHO.',
+                'tips' => [
+                    'Pertahankan pola makan bergizi seimbang dan pola hidup bersih.',
+                    'Tetap rutin hadir di Posyandu setiap bulan untuk memantau tumbuh kembangnya.'
+                ]
+            ];
+        }
+    }
+}
