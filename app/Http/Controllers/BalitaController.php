@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Anak;
 use App\Models\Posyandu;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class BalitaController extends Controller
 {
@@ -18,11 +18,11 @@ class BalitaController extends Controller
             ->where('status_aktif', true);
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('token_akses', 'like', "%{$search}%")
-                  ->orWhere('nama_orang_tua', 'like', "%{$search}%");
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('token_akses', 'like', "%{$search}%")
+                    ->orWhere('nama_orang_tua', 'like', "%{$search}%");
             });
         }
 
@@ -34,8 +34,8 @@ class BalitaController extends Controller
 
     public function create()
     {
-        $posyandus = Auth::user()->isBidan() 
-            ? Posyandu::all() 
+        $posyandus = Auth::user()->isBidan()
+            ? Posyandu::where('is_active', true)->orderBy('nama', 'asc')->get()
             : Posyandu::where('id', Auth::user()->posyandu_id)->get();
 
         return view('balita.create', compact('posyandus'));
@@ -67,7 +67,7 @@ class BalitaController extends Controller
 
         // Generate clean unique access token for parents
         $slugNama = Str::slug(substr($validated['nama'], 0, 10));
-        $validated['token_akses'] = 'BALITA-' . strtoupper($slugNama) . '-' . sprintf('%02d', rand(1, 99));
+        $validated['token_akses'] = 'BALITA-'.strtoupper($slugNama).'-'.sprintf('%02d', rand(1, 99));
 
         $anak = Anak::create($validated);
 
@@ -77,14 +77,15 @@ class BalitaController extends Controller
     public function show($id)
     {
         $anak = Anak::with(['posyandu', 'pengukurans.pembuat', 'hasilSaws'])->findOrFail($id);
+
         return view('balita.show', compact('anak'));
     }
 
     public function edit($id)
     {
         $anak = Anak::findOrFail($id);
-        $posyandus = Auth::user()->isBidan() 
-            ? Posyandu::all() 
+        $posyandus = Auth::user()->isBidan()
+            ? Posyandu::where('is_active', true)->orWhere('id', $anak->posyandu_id)->orderBy('nama', 'asc')->get()
             : Posyandu::where('id', Auth::user()->posyandu_id)->get();
 
         return view('balita.edit', compact('anak', 'posyandus'));

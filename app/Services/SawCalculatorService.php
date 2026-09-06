@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Models\Anak;
-use App\Models\Pengukuran;
 use App\Models\HasilSaw;
+use App\Models\Pengukuran;
 use Illuminate\Support\Collection;
 
 class SawCalculatorService
 {
     protected ZscoreService $zscoreService;
+
     protected GrowthFalteringService $growthFalteringService;
 
     public function __construct(ZscoreService $zscoreService, GrowthFalteringService $growthFalteringService)
@@ -19,38 +20,39 @@ class SawCalculatorService
     }
 
     /**
-     * Hitung ulang SPK SAW untuk seluruh anak yang memiliki pengukuran di posyandu tertentu (atau global)
-     *
-     * @param int|null $posyanduId
-     * @return Collection Collection dari HasilSaw yang telah disimpan/di-update
+     * Hitung SPK SAW untuk anak yang memiliki pengukuran di posyandu tertentu pada periode (bulan/tahun) tertentu.
      */
-    public function calculateForPosyandu(?int $posyanduId = null): Collection
+    public function hitungUntukPosyanduPeriode(?int $posyanduId, int $bulanUkur, int $tahunUkur): Collection
     {
-        $query = Anak::query();
+        $query = Anak::where('status_aktif', true);
         if ($posyanduId) {
             $query->where('posyandu_id', $posyanduId);
         }
 
-        $anaks = $query->with(['pengukuranTerakhir'])->get();
+        $anaks = $query->get();
 
-        // 1. Kumpulkan raw matrix
+        // 1. Kumpulkan raw matrix untuk anak yang memiliki pengukuran pada periode ini
         $rawMatrix = [];
         foreach ($anaks as $anak) {
-            $pengukuran = $anak->pengukuranTerakhir;
-            if (!$pengukuran) {
+            $pengukuran = Pengukuran::where('anak_id', $anak->id)
+                ->where('bulan_ukur', $bulanUkur)
+                ->where('tahun_ukur', $tahunUkur)
+                ->first();
+
+            if (! $pengukuran) {
                 continue;
             }
 
             // C1: TB/U Z-score
-            $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float)$pengukuran->tinggi_cm);
+            $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float) $pengukuran->tinggi_cm);
             $rawC1 = 10.0 - $zTbu; // Kontinu: makin kerdil (Z < 0), raw cost makin tinggi
 
             // C2: Growth Faltering
             $c2Data = $this->growthFalteringService->evaluate($anak, $pengukuran);
-            $rawC2 = (float)$c2Data['skor']; // 1, 2, 3, atau 4
+            $rawC2 = (float) $c2Data['skor']; // 1, 2, 3, atau 4
 
             // C3: BB/U Z-score
-            $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float)$pengukuran->berat_kg);
+            $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float) $pengukuran->berat_kg);
             $rawC3 = 10.0 - $zBbu; // Kontinu: makin kurus/underweight, raw cost makin tinggi
 
             // C4: Riwayat BBLR
@@ -113,13 +115,16 @@ class SawCalculatorService
                 $kategori = 'Rendah';
             }
 
-            // Simpan atau update ke database
+            // Simpan atau update ke database (Upsert per anak & periode)
             $hasil = HasilSaw::updateOrCreate(
                 [
                     'anak_id' => $item['anak']->id,
-                    'pengukuran_id' => $item['pengukuran']->id,
+                    'bulan_ukur' => $bulanUkur,
+                    'tahun_ukur' => $tahunUkur,
                 ],
                 [
+                    'posyandu_id' => $item['anak']->posyandu_id,
+                    'pengukuran_id' => $item['pengukuran']->id,
                     'z_tbu' => $item['z_tbu'],
                     'z_bbu' => $item['z_bbu'],
                     'raw_c1' => $item['c1'],
@@ -142,5 +147,16 @@ class SawCalculatorService
 
         // Urutkan ASCENDING berdasarkan nilai_v (V terkecil = Risiko Tertinggi = Ranking 1)
         return $results->sortBy('nilai_v')->values();
+    }
+
+    /**
+     * Compatibility wrapper for calculateForPosyandu
+     */
+    public function calculateForPosyandu(?int $posyanduId = null, ?int $bulanUkur = null, ?int $tahunUkur = null): Collection
+    {
+        $bulan = $bulanUkur ?? now()->month;
+        $tahun = $tahunUkur ?? now()->year;
+
+        return $this->hitungUntukPosyanduPeriode($posyanduId, (int) $bulan, (int) $tahun);
     }
 }

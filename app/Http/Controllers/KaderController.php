@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Posyandu;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,7 +12,7 @@ class KaderController extends Controller
 {
     private function checkBidanAccess()
     {
-        if (!Auth::check() || !Auth::user()->isBidan()) {
+        if (! Auth::check() || ! Auth::user()->isBidan()) {
             abort(403, 'Akses khusus Bidan Desa');
         }
     }
@@ -27,10 +27,10 @@ class KaderController extends Controller
         $query = User::with('posyandu')->where('role', 'kader');
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -48,7 +48,8 @@ class KaderController extends Controller
     {
         $this->checkBidanAccess();
 
-        $posyandus = Posyandu::all();
+        $posyandus = Posyandu::where('is_active', true)->orderBy('nama', 'asc')->get();
+
         return view('kader.create', compact('posyandus'));
     }
 
@@ -77,7 +78,7 @@ class KaderController extends Controller
         $this->checkBidanAccess();
 
         $kader = User::where('role', 'kader')->findOrFail($id);
-        $posyandus = Posyandu::all();
+        $posyandus = Posyandu::where('is_active', true)->orWhere('id', $kader->posyandu_id)->orderBy('nama', 'asc')->get();
 
         return view('kader.edit', compact('kader', 'posyandus'));
     }
@@ -90,13 +91,13 @@ class KaderController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $kader->id,
-            'email' => 'nullable|email|max:255|unique:users,email,' . $kader->id,
+            'username' => 'required|string|max:255|unique:users,username,'.$kader->id,
+            'email' => 'nullable|email|max:255|unique:users,email,'.$kader->id,
             'password' => 'nullable|string|min:6',
             'posyandu_id' => 'required|exists:posyandus,id',
         ]);
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);

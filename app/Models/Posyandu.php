@@ -13,11 +13,16 @@ class Posyandu extends Model
     protected $fillable = [
         'nama',
         'wilayah',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function users(): HasMany
     {
-        return $table = $this->hasMany(User::class);
+        return $this->hasMany(User::class);
     }
 
     public function anaks(): HasMany

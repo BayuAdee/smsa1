@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Anak;
+use Illuminate\Http\Request;
 
 class OrtuController extends Controller
 {
@@ -15,16 +15,16 @@ class OrtuController extends Controller
     public function checkToken(Request $request)
     {
         $request->validate([
-            'token' => 'required|string|trim',
+            'token' => 'required|string',
         ]);
 
-        $token = str_replace(' ', '', strtoupper($request->token));
+        $token = str_replace(' ', '', strtoupper(trim($request->token)));
 
         $anak = Anak::withoutGlobalScope('posyandu_scope')
             ->where('token_akses', $token)
             ->first();
 
-        if (!$anak) {
+        if (! $anak) {
             return back()->withInput()->with('error', 'Kode token anak tidak ditemukan. Silakan periksa kembali token unik dari Posyandu.');
         }
 
@@ -33,11 +33,21 @@ class OrtuController extends Controller
 
     public function show($token)
     {
+        $token = str_replace(' ', '', strtoupper(trim($token)));
+
         $anak = Anak::withoutGlobalScope('posyandu_scope')
             ->where('token_akses', $token)
-            ->with(['posyandu', 'pengukurans' => function ($q) {
-                $q->orderBy('tanggal_ukur', 'asc');
-            }, 'hasilSawTerakhir'])
+            ->with([
+                'posyandu' => function ($q) {
+                    $q->withoutGlobalScope('posyandu_scope');
+                },
+                'pengukurans' => function ($q) {
+                    $q->withoutGlobalScope('posyandu_scope')->orderBy('tanggal_ukur', 'asc');
+                },
+                'hasilSawTerakhir' => function ($q) {
+                    $q->withoutGlobalScope('posyandu_scope');
+                },
+            ])
             ->firstOrFail();
 
         $pengukurans = $anak->pengukurans;
@@ -51,15 +61,15 @@ class OrtuController extends Controller
 
     private function getLaymanStatus($hasilSaw, $pengukuranTerakhir)
     {
-        if (!$hasilSaw || !$pengukuranTerakhir) {
+        if (! $hasilSaw || ! $pengukuranTerakhir) {
             return [
                 'badge_color' => 'bg-sky-500/20 text-sky-300 border-sky-500/30',
                 'title' => 'Belum Ada Perhitungan SAW',
                 'description' => 'Balita ini baru terdaftar dan belum memiliki data pengukuran yang lengkap.',
                 'tips' => [
                     'Bawa balita ke Posyandu rutin setiap bulan.',
-                    'Pastikan balita mendapatkan ASI Eksklusif dan MPASI bergizi seimbang.'
-                ]
+                    'Pastikan balita mendapatkan ASI Eksklusif dan MPASI bergizi seimbang.',
+                ],
             ];
         }
 
@@ -75,8 +85,8 @@ class OrtuController extends Controller
                 'tips' => [
                     'Konsultasikan dengan Bidan Desa / Dokter di Puskesmas terdekat.',
                     'Berikan makanan tinggi protein hewani (telur, ikan, daging ayam/sapi) setiap hari.',
-                    'Pastikan imunisasi lengkap dan berikan vitamin A sesuai jadwal Posyandu.'
-                ]
+                    'Pastikan imunisasi lengkap dan berikan vitamin A sesuai jadwal Posyandu.',
+                ],
             ];
         } elseif ($kategori === 'Tinggi') {
             return [
@@ -87,8 +97,8 @@ class OrtuController extends Controller
                 'tips' => [
                     'Variasikan MPASI dengan asupan protein dan kalori yang cukup.',
                     'Pantau terus penimbangan berat dan tinggi badan di Posyandu bulan depan.',
-                    'Menjaga kebersihan lingkungan dan sanitasi air minum rumah tangga.'
-                ]
+                    'Menjaga kebersihan lingkungan dan sanitasi air minum rumah tangga.',
+                ],
             ];
         } elseif ($kategori === 'Sedang') {
             return [
@@ -98,8 +108,8 @@ class OrtuController extends Controller
                 'description' => 'Pertumbuhan anak relatif stabil, terus pertahankan asupan nutrisi seimbang dan tingkatkan proteksi kesehatan.',
                 'tips' => [
                     'Lanjutkan pemberian makanan bergizi seimbang 3 kali sehari.',
-                    'Jaga pola tidur anak yang cukup dan aktifitas bermain yang sehat.'
-                ]
+                    'Jaga pola tidur anak yang cukup dan aktifitas bermain yang sehat.',
+                ],
             ];
         } else {
             return [
@@ -109,8 +119,8 @@ class OrtuController extends Controller
                 'description' => 'Tinggi dan berat badan si kecil sesuai dengan grafik pertumbuhan anak sehat WHO.',
                 'tips' => [
                     'Pertahankan pola makan bergizi seimbang dan pola hidup bersih.',
-                    'Tetap rutin hadir di Posyandu setiap bulan untuk memantau tumbuh kembangnya.'
-                ]
+                    'Tetap rutin hadir di Posyandu setiap bulan untuk memantau tumbuh kembangnya.',
+                ],
             ];
         }
     }
