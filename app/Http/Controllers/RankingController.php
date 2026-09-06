@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\HasilSaw;
 use App\Services\SawCalculatorService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RankingController extends Controller
@@ -18,29 +18,52 @@ class RankingController extends Controller
 
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $selectedBulan = (int) $request->input('bulan', now()->month);
+        $selectedTahun = (int) $request->input('tahun', now()->year);
 
         // Get SAW Rankings sorted ASCENDING by nilai_v (V terkecil = Risiko Stunting Tertinggi = Rank 1)
+        // Filtered by selected periode
         $rankings = HasilSaw::with(['anak.posyandu', 'pengukuran'])
-            ->whereHas('anak', function($q) {
+            ->where('bulan_ukur', $selectedBulan)
+            ->where('tahun_ukur', $selectedTahun)
+            ->whereHas('anak', function ($q) {
                 $q->where('status_aktif', true);
             })
             ->orderBy('nilai_v', 'asc')
             ->get();
 
-        return view('ranking.index', compact('rankings'));
+        // Generate Opsi Periode
+        $periodeOptions = [];
+        $current = now()->subMonths(10);
+        for ($i = 0; $i < 13; $i++) {
+            $m = (int) $current->format('n');
+            $y = (int) $current->format('Y');
+            $label = $current->translatedFormat('F Y');
+            $periodeOptions[] = [
+                'bulan' => $m,
+                'tahun' => $y,
+                'label' => $label,
+            ];
+            $current->addMonth();
+        }
+
+        return view('ranking.index', compact('rankings', 'selectedBulan', 'selectedTahun', 'periodeOptions'));
     }
 
-    public function recalculate()
+    public function recalculate(Request $request)
     {
+        $selectedBulan = (int) $request->input('bulan', now()->month);
+        $selectedTahun = (int) $request->input('tahun', now()->year);
+
         $user = Auth::user();
         $posyanduId = $user->isKader() ? $user->posyandu_id : session('selected_posyandu_id');
         if ($posyanduId === 'all') {
             $posyanduId = null;
         }
 
-        $this->sawCalculatorService->calculateForPosyandu($posyanduId);
+        $this->sawCalculatorService->hitungUntukPosyanduPeriode($posyanduId, $selectedBulan, $selectedTahun);
 
-        return back()->with('success', 'Kalkulasi ulang SPK SAW berhasil dilakukan.');
+        return redirect()->route('ranking.index', ['bulan' => $selectedBulan, 'tahun' => $selectedTahun])
+            ->with('success', "Kalkulasi ulang SPK SAW periode {$selectedBulan}/{$selectedTahun} berhasil dilakukan.");
     }
 }

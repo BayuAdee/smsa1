@@ -7,39 +7,81 @@
 
 <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-6">
     
-    <!-- Header & Recalculate Button -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- Header, Periode Dropdown, & Recalculate Button -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-            <h2 class="text-base sm:text-xl font-extrabold text-white">Ranking Prioritas Penanganan Stunting (Simple Additive Weighting)</h2>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Month/Year SAW Engine</span>
+            <h2 class="text-base sm:text-xl font-extrabold text-white mt-0.5">Ranking Prioritas Penanganan Stunting (SAW)</h2>
             <p class="text-xs text-slate-400 mt-1 max-w-2xl">
-                Penetapan prioritas dihitung secara otomatis berdasarkan 4 kriteria COST: <strong class="text-emerald-400">C1: TB/U Z-Score (40%)</strong>, <strong class="text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-400">C3: BB/U Z-Score (25%)</strong>, dan <strong class="text-amber-400">C4: Riwayat BBLR (10%)</strong>.
+                SPK SAW COST dihitung per periode bulan: <strong class="text-emerald-400">C1: TB/U Z-Score (40%)</strong>, <strong class="text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-400">C3: BB/U Z-Score (25%)</strong>, dan <strong class="text-amber-400">C4: Riwayat BBLR (10%)</strong>.
             </p>
         </div>
 
-        <form action="{{ route('ranking.recalculate') }}" method="POST">
-            @csrf
-            <button type="submit" class="w-full sm:w-auto py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all min-h-[44px] shadow-md">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                <span>Hitung Ulang SPK SAW</span>
-            </button>
-        </form>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <!-- Filter Periode Dropdown -->
+            <form action="{{ route('ranking.index') }}" method="GET" class="flex items-center gap-2">
+                <div class="relative w-full sm:w-auto min-w-[190px]">
+                    <label for="ranking_periode_select" class="sr-only">Pilih Periode Ranking</label>
+                    <select id="ranking_periode_select" name="periode_key" onchange="submitRankingPeriode(this)" class="w-full bg-slate-950 border border-slate-700 text-white font-extrabold text-xs rounded-2xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-pointer pr-10 shadow-inner min-h-[44px]">
+                        @foreach($periodeOptions as $opt)
+                            @php
+                                $isSelected = ($opt['bulan'] === $selectedBulan && $opt['tahun'] === $selectedTahun);
+                            @endphp
+                            <option value="{{ $opt['bulan'] }}-{{ $opt['tahun'] }}" {{ $isSelected ? 'selected' : '' }}>
+                                Filter: {{ $opt['label'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+                <input type="hidden" name="bulan" id="r_param_bulan" value="{{ $selectedBulan }}">
+                <input type="hidden" name="tahun" id="r_param_tahun" value="{{ $selectedTahun }}">
+            </form>
+
+            <!-- Recalculate Button -->
+            <form action="{{ route('ranking.recalculate') }}" method="POST">
+                @csrf
+                <input type="hidden" name="bulan" value="{{ $selectedBulan }}">
+                <input type="hidden" name="tahun" value="{{ $selectedTahun }}">
+                <button type="submit" class="w-full sm:w-auto py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all min-h-[44px] shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Hitung Ulang SPK</span>
+                </button>
+            </form>
+        </div>
     </div>
 
-    <!-- Explanation Banner -->
-    <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl text-xs space-y-2">
-        <div class="font-bold text-white flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>Metode Perhitungan Cost Normalization:</span>
+    <!-- Active Periode Status Banner -->
+    <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="space-y-1">
+            <div class="font-black text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Periode Aktif: {{ \Carbon\Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->translatedFormat('F Y') }}</span>
+            </div>
+            <p class="text-slate-400 text-[11px]">
+                Menampilkan hasil kalkulasi SPK SAW yang membandingkan balita dengan catatan pengukuran aktif pada periode ini.
+            </p>
         </div>
-        <p class="text-slate-300 text-[11px] leading-relaxed">
-            Dalam metode SAW COST, rumus normalisasi yang digunakan adalah <code class="text-emerald-300">r_ij = min(X_j) / X_ij</code>.
-            Balita dengan <strong class="text-rose-300">Nilai Preferensi V_i terkecil</strong> menunjukkan derajat risiko stunting tertinggi (Ranking #1) dan memerlukan prioritas intervensi penanganan paling mendesak.
-        </p>
+
+        <span class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-300 font-extrabold text-[11px] border border-slate-700 shrink-0">
+            Total Matriks: {{ $rankings->count() }} Balita
+        </span>
     </div>
+
+    @if(session('success'))
+        <div class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
 
     @if($rankings->count() > 0)
         <!-- Desktop Table View -->
@@ -79,7 +121,14 @@
                                 <a href="{{ route('balita.show', $h->anak->id) }}" class="hover:text-emerald-400">
                                     {{ $h->anak->nama }}
                                 </a>
-                                <span class="block text-[11px] text-slate-400 font-mono font-normal">{{ $h->anak->token_akses }}</span>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-[11px] text-slate-400 font-mono font-normal">{{ $h->anak->token_akses }}</span>
+                                    <button type="button" onclick="copyToClipboard('{{ $h->anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-500 hover:text-emerald-400 transition-colors p-0.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
 
                             <td class="py-4 px-4 text-slate-300">{{ $h->anak->posyandu->nama ?? '-' }}</td>
@@ -198,10 +247,22 @@
         </div>
     @else
         <div class="text-center py-12 text-slate-400 text-xs">
-            Belum ada data perhitungan ranking SAW. Silakan klik tombol "Hitung Ulang SPK SAW".
+            Belum ada data perhitungan ranking SAW untuk periode <strong>{{ \Carbon\Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->translatedFormat('F Y') }}</strong>. Silakan input pengukuran balita atau klik tombol "Hitung Ulang SPK".
         </div>
     @endif
 
 </div>
+
+<script>
+function submitRankingPeriode(selectEl) {
+    const val = selectEl.value;
+    const parts = val.split('-');
+    if (parts.length === 2) {
+        document.getElementById('r_param_bulan').value = parts[0];
+        document.getElementById('r_param_tahun').value = parts[1];
+        selectEl.form.submit();
+    }
+}
+</script>
 
 @endsection

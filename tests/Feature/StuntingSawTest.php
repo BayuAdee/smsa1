@@ -2,16 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Posyandu;
 use App\Models\Anak;
-use App\Models\Pengukuran;
-use App\Models\HasilSaw;
-use App\Services\ZscoreService;
-use App\Services\GrowthFalteringService;
+use App\Models\Posyandu;
+use App\Models\User;
 use App\Services\SawCalculatorService;
+use App\Services\ZscoreService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class StuntingSawTest extends TestCase
 {
@@ -27,7 +24,7 @@ class StuntingSawTest extends TestCase
     {
         $zscoreService = app(ZscoreService::class);
         $zTbu = $zscoreService->calculate('tbu', 'L', 18, 75.2);
-        
+
         $this->assertIsFloat($zTbu);
     }
 
@@ -77,5 +74,25 @@ class StuntingSawTest extends TestCase
         $response = $this->get('/ortu/BALITA-RAIHAN-01');
         $response->assertStatus(200);
         $response->assertSee('Ahmad Raihan');
+    }
+
+    public function test_public_ortu_can_access_daffa_token_and_see_measurements()
+    {
+        $response = $this->get('/ortu/BALITA-DAFFA-05');
+        $response->assertStatus(200);
+        $response->assertSee('Daffa Ibnu');
+        $response->assertSee('79'); // tinggi cm
+    }
+
+    public function test_ortu_portal_works_even_when_kader_from_another_posyandu_is_logged_in()
+    {
+        $kader1 = User::where('username', 'kader1')->first();
+        $this->actingAs($kader1);
+
+        // BALITA-DAFFA-05 is in Posyandu 2 while Kader 1 is in Posyandu 1
+        $response = $this->get('/ortu/BALITA-DAFFA-05');
+        $response->assertStatus(200);
+        $response->assertSee('Daffa Ibnu');
+        $response->assertSee('79');
     }
 }

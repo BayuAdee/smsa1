@@ -1,14 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\OrtuController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BalitaController;
-use App\Http\Controllers\PengukuranController;
-use App\Http\Controllers\RankingController;
-use App\Http\Controllers\PosyanduController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaderController;
+use App\Http\Controllers\OrtuController;
+use App\Http\Controllers\PengukuranController;
+use App\Http\Controllers\PosyanduController;
+use App\Http\Controllers\RankingController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
     // Data Posyandu
     Route::get('/posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
     Route::post('/posyandu', [PosyanduController::class, 'store'])->name('posyandu.store');
+    Route::put('/posyandu/{id}', [PosyanduController::class, 'update'])->name('posyandu.update');
+    Route::patch('/posyandu/{id}/toggle', [PosyanduController::class, 'toggleStatus'])->name('posyandu.toggle');
 
     // Kelola Data Kader (CRUD - Khusus Bidan Desa)
     Route::get('/kader', [KaderController::class, 'index'])->name('kader.index');

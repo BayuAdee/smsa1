@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasPosyanduScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-use App\Models\Traits\HasPosyanduScope;
 
 class HasilSaw extends Model
 {
@@ -16,7 +15,10 @@ class HasilSaw extends Model
 
     protected $fillable = [
         'anak_id',
+        'posyandu_id',
         'pengukuran_id',
+        'bulan_ukur',
+        'tahun_ukur',
         'z_tbu',
         'z_bbu',
         'raw_c1',
@@ -34,6 +36,9 @@ class HasilSaw extends Model
     ];
 
     protected $casts = [
+        'posyandu_id' => 'integer',
+        'bulan_ukur' => 'integer',
+        'tahun_ukur' => 'integer',
         'z_tbu' => 'float',
         'z_bbu' => 'float',
         'raw_c1' => 'float',
@@ -48,6 +53,11 @@ class HasilSaw extends Model
         'is_c2_estimasi' => 'boolean',
         'dihitung_pada' => 'datetime',
     ];
+
+    public function posyandu(): BelongsTo
+    {
+        return $this->belongsTo(Posyandu::class);
+    }
 
     public function anak(): BelongsTo
     {
