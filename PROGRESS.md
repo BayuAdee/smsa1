@@ -9,6 +9,7 @@
 - [x] **Fase 6: Refactoring Alur Input Pengukuran Bulanan & Perangkingan SAW Berbasis Periode Bulan (Month/Year Session)** (Selesai)
 - [x] **Fase 7: Fitur Client-Side (Search Real-time >=3 Karakter & Toggle Filter "Belum Diukur")** (Selesai)
 - [x] **Fase 8: Revisi Modul Manajemen Posyandu (Edit, Soft-Status Toggle, & Unique Validation)** (Selesai)
+- [x] **Fase 9: Dedicated Menu & Halaman Import/Export Data Berbasis Role** (Selesai)
 
 ---
 
@@ -68,3 +69,23 @@
   - Posyandu yang non-aktif otomatis ditampilkan pada urutan paling bawah (`orderBy('is_active', 'desc')->orderBy('nama', 'asc')`).
 - **Pengujian**:
   - Penambahan feature test `PosyanduManagementTest.php` (100% test suite passing, 19 tests, 75 assertions).
+
+### Fase 9: Dedicated Menu & Halaman Import/Export Data Berbasis Role
+- **Penambahan Navigation Sidebar**:
+  - Menambahkan item menu internal: `📥 Import & Export Data` (`route('import-export.index')`) yang dapat diakses oleh Kader maupun Bidan.
+- **Authorization & Gate (`import-data`)**:
+  - Registrasi Gate `import-data` di `AppServiceProvider.php` untuk memproteksi endpoint `downloadTemplate`, `previewImport`, dan `executeImport`.
+  - Kader yang mencoba melakukan POST request ke endpoint import akan langsung mendapatkan proteksi HTTP 403 Forbidden.
+- **Fitur Import Data Balita (Khusus Role Bidan)**:
+  - Tombol aksi "Download Template (.csv)" untuk mengunduh berkas acuan CSV yang ramah Excel (UTF-8 BOM header).
+  - Alur Pratinjau Validasi 2-Step (`previewImport` -> `executeImport`):
+    * Memvalidasi keberadaan ID Posyandu, kelengkapan nama, format NIK, tanggal lahir (format YYYY-MM-DD & tidak di masa depan), jenis kelamin (L/P), berat lahir gram (500–6000g), dan status BBLR (dengan auto-normalize).
+    * Menampilkan tabel pratinjau dengan indikator badge warna: `[Valid - Hijau]` dan `[Error - Merah]` beserta rincian error per baris.
+    * Tombol "Eksekusi Import" hanya memproses dan memasukkan baris-baris data yang valid ke tabel `anaks` dengan generate `token_akses` unik secara otomatis.
+- **Fitur Export Data Laporan (Role Bidan & Kader)**:
+  - Form Filter Export dengan opsi Scope Posyandu, Periode Bulan & Tahun, Jenis Data Laporan (`profil_balita`, `pengukuran_bulanan`, `ranking_saw`), dan Format Output (`excel` / `.csv` atau `pdf`).
+  - Penguncian Scope Kader: Jika login sebagai Kader, pilihan Posyandu otomatis dikunci pada `posyandu_id` milik kader tersebut dan disajikan dalam bentuk badge readonly terkunci.
+  - Generasi berkas Excel (.csv stream) dan PDF pratinjau cetak resmi lengkap dengan blok tanda tangan Kader & Bidan Desa.
+- **Pengujian & Verifikasi**:
+  - Penambahan Feature Test `ImportExportTest.php` (9 tests, 28 assertions).
+  - Total test suite aplikasi: 100% passing (30 tests, 109 assertions).
