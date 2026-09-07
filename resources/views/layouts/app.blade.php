@@ -19,9 +19,9 @@
     <div class="flex h-screen overflow-hidden">
 
         <!-- Mobile Sidebar Backdrop overlay -->
-        <div x-show="sidebarOpen" 
-             x-cloak 
-             @click="sidebarOpen = false" 
+        <div x-show="sidebarOpen"
+             x-cloak
+             @click="sidebarOpen = false"
              x-transition:enter="transition-opacity ease-linear duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -33,7 +33,7 @@
         <!-- Sidebar Container (Drawer on Mobile, Fixed/Pinned on lg Desktop) -->
         <aside class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800/80 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:translate-x-0"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-            
+
             <!-- Sidebar Header Brand -->
             <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
@@ -97,6 +97,13 @@
                     <span>Data Posyandu</span>
                 </a>
 
+                <a href="{{ route('import-export.index') }}" class="flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold transition-all duration-200 min-h-[44px] {{ request()->routeIs('import-export.*') ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/10 text-emerald-300 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('import-export.*') ? 'text-emerald-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                    </svg>
+                    <span>Import & Export Data</span>
+                </a>
+
                 @if(Auth::user()->isBidan())
                 <a href="{{ route('kader.index') }}" class="flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold transition-all duration-200 min-h-[44px] {{ request()->routeIs('kader.*') ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/10 text-emerald-300 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <svg class="w-5 h-5 {{ request()->routeIs('kader.*') ? 'text-emerald-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +142,7 @@
 
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            
+
             <!-- Topbar Header -->
             <header class="h-16 bg-slate-900/90 border-b border-slate-800/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30">
                 <div class="flex items-center gap-3">
@@ -158,7 +165,7 @@
                         <form action="{{ route('select-posyandu') }}" method="POST" class="flex items-center gap-2">
                             @csrf
                             <label for="posyandu_id" class="hidden sm:inline text-xs font-semibold text-slate-400">Scope Posyandu:</label>
-                            <select name="posyandu_id" onchange="this.form.submit()" 
+                            <select name="posyandu_id" onchange="this.form.submit()"
                                     class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 min-h-[40px] font-semibold cursor-pointer">
                                 <option value="all" {{ session('selected_posyandu_id', 'all') == 'all' ? 'selected' : '' }}>Semua Posyandu (Gabungan)</option>
                                 @foreach(\App\Models\Posyandu::where('is_active', true)->orderBy('nama', 'asc')->get() as $pos)

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BalitaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\KaderController;
 use App\Http\Controllers\OrtuController;
 use App\Http\Controllers\PengukuranController;
@@ -71,4 +72,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kader/{id}/edit', [KaderController::class, 'edit'])->name('kader.edit');
     Route::put('/kader/{id}', [KaderController::class, 'update'])->name('kader.update');
     Route::delete('/kader/{id}', [KaderController::class, 'destroy'])->name('kader.destroy');
+
+    // Import & Export Data Dedicated Routes
+    Route::get('/import-export', [ImportExportController::class, 'index'])->name('import-export.index');
+    Route::get('/import-export/template', [ImportExportController::class, 'downloadTemplate'])->name('import-export.template');
+    Route::post('/import-export/preview', [ImportExportController::class, 'previewImport'])->name('import-export.preview');
+    Route::post('/import-export/execute', [ImportExportController::class, 'executeImport'])->name('import-export.execute');
+    Route::get('/import-export/export', [ImportExportController::class, 'export'])->name('import-export.export');
 });
