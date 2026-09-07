@@ -103,13 +103,17 @@
 
             <!-- Client-Side Controls (Search & Status Filter) -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <!-- Search Input (Real-time min 3 chars) -->
+                <!-- Search Input (AJAX min 3 chars with debounce & spinner) -->
                 <div class="relative min-w-[240px]">
-                    <input type="text" id="search_nama" oninput="filterBalitaList()" placeholder="Cari Nama Balita..." 
+                    <input type="text" id="search_nama" oninput="handleSearchInput()" placeholder="Cari Nama Balita... (Min. 3 Karakter)" 
                         class="w-full bg-slate-950 border border-slate-700 text-white font-semibold text-xs rounded-2xl pl-9 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner transition-all placeholder:text-slate-500 min-h-[42px]">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="search_icon" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <svg id="search_spinner" class="hidden w-4 h-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </div>
                 </div>
@@ -282,6 +286,16 @@
 
 <script>
 let currentStatusFilter = 'all'; // 'all' or 'belum'
+let searchDebounceTimer = null;
+let initialGridHtml = '';
+let isAjaxSearchActive = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('balita_grid');
+    if (grid) {
+        initialGridHtml = grid.innerHTML;
+    }
+});
 
 function submitPeriode(selectEl) {
     const val = selectEl.value;
@@ -310,22 +324,145 @@ function setStatusFilter(filterType) {
     filterBalitaList();
 }
 
-function filterBalitaList() {
+function handleSearchInput() {
     const searchVal = document.getElementById('search_nama').value.trim();
-    // Rule: Filter kata kunci baru aktif jika panjang input >= 3 karakter. Jika 0-2 karakter, jangan saring kata kunci.
-    const searchKeyword = searchVal.length >= 3 ? searchVal.toLowerCase() : '';
+    const searchIcon = document.getElementById('search_icon');
+    const searchSpinner = document.getElementById('search_spinner');
 
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+
+    if (searchVal.length < 3) {
+        if (searchIcon) searchIcon.classList.remove('hidden');
+        if (searchSpinner) searchSpinner.classList.add('hidden');
+
+        if (isAjaxSearchActive) {
+            isAjaxSearchActive = false;
+            const grid = document.getElementById('balita_grid');
+            if (grid && initialGridHtml) {
+                grid.innerHTML = initialGridHtml;
+            }
+        }
+        filterBalitaList();
+        return;
+    }
+
+    if (searchIcon) searchIcon.classList.add('hidden');
+    if (searchSpinner) searchSpinner.classList.remove('hidden');
+
+    searchDebounceTimer = setTimeout(() => {
+        performBalitaSearch(searchVal);
+    }, 300);
+}
+
+async function performBalitaSearch(query) {
+    const bulan = document.getElementById('param_bulan').value;
+    const tahun = document.getElementById('param_tahun').value;
+    const searchIcon = document.getElementById('search_icon');
+    const searchSpinner = document.getElementById('search_spinner');
+
+    try {
+        const url = `{{ route('balita.search') }}?q=${encodeURIComponent(query)}&bulan=${bulan}&tahun=${tahun}`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const json = await response.json();
+
+        if (json.success) {
+            isAjaxSearchActive = true;
+            renderSearchGridResults(json.data);
+        }
+    } catch (err) {
+        console.error('Error fetching balita search:', err);
+    } finally {
+        if (searchIcon) searchIcon.classList.remove('hidden');
+        if (searchSpinner) searchSpinner.classList.add('hidden');
+    }
+}
+
+function renderSearchGridResults(items) {
+    const grid = document.getElementById('balita_grid');
+    if (!grid) return;
+
+    if (items.length === 0) {
+        grid.innerHTML = '';
+        const notice = document.getElementById('no_results_notice');
+        if (notice) notice.classList.remove('hidden');
+        return;
+    }
+
+    let html = '';
+    items.forEach(anak => {
+        const sudah = anak.sudah_diukur;
+        const p = anak.pengukuran;
+        const namaEscaped = anak.nama.replace(/'/g, "\\'");
+
+        html += `
+            <div id="card_anak_${anak.id}" 
+                data-nama="${anak.nama.toLowerCase()}" 
+                data-sudah="${sudah ? '1' : '0'}"
+                class="card-balita bg-slate-950/90 border ${sudah ? 'border-emerald-500/30' : 'border-slate-800'} hover:border-slate-700 p-4 rounded-2xl space-y-3 transition-all shadow-md relative group">
+                
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <a href="${anak.show_url}" class="font-black text-white text-sm hover:text-emerald-400 transition-colors block">
+                            ${anak.nama}
+                        </a>
+                        <span class="text-[11px] text-slate-400 font-semibold block mt-0.5">
+                            ${anak.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'} • ${anak.usia_periode} Bulan
+                        </span>
+                    </div>
+
+                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-lg bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                        ${anak.posyandu_nama}
+                    </span>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                    <div id="status_container_${anak.id}">
+                        ${sudah ? `
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span id="badge_text_${anak.id}">Sudah: ${p ? p.tinggi_formatted : ''} cm / ${p ? p.berat_formatted : ''} kg</span>
+                            </span>
+                        ` : `
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-400 border border-slate-700">
+                                <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span>
+                                <span id="badge_text_${anak.id}">Belum Diukur</span>
+                            </span>
+                        `}
+                    </div>
+
+                    <button type="button" 
+                        onclick="openInputModal(${anak.id}, '${namaEscaped}', '${p ? p.tinggi_cm : ''}', '${p ? p.berat_kg : ''}', ${anak.usia_periode})"
+                        class="py-1.5 px-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 min-h-[38px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="${sudah ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4'}"/>
+                        </svg>
+                        <span>${sudah ? 'Edit Data' : 'Input Data'}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    grid.innerHTML = html;
+    filterBalitaList();
+}
+
+function filterBalitaList() {
     const cards = document.querySelectorAll('.card-balita');
     let visibleCount = 0;
 
     cards.forEach(card => {
-        const nama = card.getAttribute('data-nama') || '';
         const sudah = card.getAttribute('data-sudah') === '1';
-
-        const matchSearch = searchKeyword === '' || nama.includes(searchKeyword);
         const matchStatus = currentStatusFilter === 'all' || (currentStatusFilter === 'belum' && !sudah);
 
-        if (matchSearch && matchStatus) {
+        if (matchStatus) {
             card.classList.remove('hidden');
             visibleCount++;
         } else {
@@ -335,7 +472,7 @@ function filterBalitaList() {
 
     const notice = document.getElementById('no_results_notice');
     if (notice) {
-        if (visibleCount === 0 && cards.length > 0) {
+        if (visibleCount === 0) {
             notice.classList.remove('hidden');
         } else {
             notice.classList.add('hidden');

@@ -59,10 +59,10 @@ class ImportExportController extends Controller
                 'posyandu',
             ]);
 
-            // Add sample row from user specification
+            // Add sample row from user specification with NIK formatted as Excel text string
             fputcsv($file, [
                 'Budi Santoso',
-                '3201011234567890',
+                '="3201011234567890"',
                 '12-05-2025',
                 'L',
                 3400,
@@ -91,7 +91,9 @@ class ImportExportController extends Controller
         $file = $request->file('file_import');
         $filePath = $file->getRealPath();
 
-        $rows = [];
+        $rawItems = [];
+        $fileNiks = [];
+
         if (($handle = fopen($filePath, 'r')) !== false) {
             // Remove BOM if present
             $bom = fread($handle, 3);
@@ -132,119 +134,184 @@ class ImportExportController extends Controller
                     $row[$colName] = isset($data[$i]) ? trim($data[$i]) : '';
                 }
 
-                // Validate row fields
-                $errors = [];
-
-                // Posyandu validation (supports Posyandu Name or Posyandu ID)
-                $posyanduInput = trim($row['posyandu'] ?? $row['posyandu_id'] ?? '');
-                $posyanduObj = null;
-                $posyanduId = null;
-                $posyanduNama = null;
-
-                if (empty($posyanduInput)) {
-                    $errors[] = 'Posyandu wajib diisi.';
-                } else {
-                    if (is_numeric($posyanduInput)) {
-                        $posyanduObj = Posyandu::find((int) $posyanduInput);
+                // Clean NIK for counting file occurrences
+                $nikClean = trim($row['nik'] ?? '');
+                if (! empty($nikClean)) {
+                    if (str_starts_with($nikClean, '="') && str_ends_with($nikClean, '"')) {
+                        $nikClean = substr($nikClean, 2, -1);
                     }
-                    if (! $posyanduObj) {
-                        $posyanduObj = Posyandu::where('nama', 'like', $posyanduInput)->first();
+                    $nikClean = ltrim($nikClean, "'`\"");
+                    if (is_numeric($nikClean) && (str_contains($nikClean, 'E+') || str_contains($nikClean, 'e+'))) {
+                        $nikClean = sprintf('%.0f', (float) $nikClean);
                     }
-                    if (! $posyanduObj) {
-                        $posyanduObj = Posyandu::where('nama', 'like', "%{$posyanduInput}%")->first();
-                    }
-
-                    if ($posyanduObj) {
-                        $posyanduId = $posyanduObj->id;
-                        $posyanduNama = $posyanduObj->nama;
-                    } else {
-                        $errors[] = "Posyandu '{$posyanduInput}' tidak ditemukan di sistem.";
-                    }
+                    $fileNiks[] = $nikClean;
                 }
 
-                // Nama validation
-                $nama = $row['nama'] ?? '';
-                if (empty($nama)) {
-                    $errors[] = 'Nama balita wajib diisi.';
-                }
-
-                // NIK validation (optional)
-                $nik = $row['nik'] ?? null;
-                if (! empty($nik) && strlen($nik) > 20) {
-                    $errors[] = 'NIK tidak boleh melebihi 20 karakter.';
-                }
-
-                // Tanggal lahir validation (supports DD-MM-YYYY, YYYY-MM-DD, DD/MM/YYYY)
-                $tglLahir = trim($row['tanggal_lahir'] ?? '');
-                $parsedDate = null;
-                if (empty($tglLahir)) {
-                    $errors[] = 'Tanggal lahir wajib diisi.';
-                } else {
-                    try {
-                        if (preg_match('/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/', $tglLahir)) {
-                            $normalizedDate = str_replace('/', '-', $tglLahir);
-                            $parsedDate = Carbon::createFromFormat('d-m-Y', $normalizedDate);
-                        } else {
-                            $parsedDate = Carbon::parse($tglLahir);
-                        }
-
-                        if ($parsedDate->isFuture()) {
-                            $errors[] = 'Tanggal lahir tidak boleh di masa depan.';
-                        }
-                    } catch (\Exception $e) {
-                        $errors[] = 'Format tanggal lahir tidak valid (Gunakan DD-MM-YYYY atau YYYY-MM-DD).';
-                    }
-                }
-
-                // Jenis Kelamin
-                $jk = strtoupper(trim($row['jenis_kelamin'] ?? ''));
-                if (! in_array($jk, ['L', 'P'])) {
-                    $errors[] = 'Jenis kelamin harus L (Laki-laki) atau P (Perempuan).';
-                }
-
-                // Berat Lahir Gram
-                $beratGram = filter_var($row['berat_lahir_gram'] ?? null, FILTER_VALIDATE_INT);
-                if ($beratGram === false || $beratGram < 500 || $beratGram > 6000) {
-                    $errors[] = 'Berat lahir (gram) harus berupa angka antara 500g - 6000g.';
-                }
-
-                // Status BBLR
-                $rawBblr = strtolower(trim($row['status_bblr'] ?? ''));
-                $statusBblr = 'tidak';
-                if (in_array($rawBblr, ['bblr', '1', 'ya', 'true'])) {
-                    $statusBblr = 'bblr';
-                } elseif (in_array($rawBblr, ['tidak_diketahui', 'unknown', '2'])) {
-                    $statusBblr = 'tidak_diketahui';
-                } elseif (in_array($rawBblr, ['tidak', '0', 'tidak bblr', 'false', ''])) {
-                    $statusBblr = 'tidak';
-                } else {
-                    $errors[] = 'Status BBLR harus: tidak, bblr, atau tidak_diketahui.';
-                }
-
-                // Nama Orang Tua
-                $namaOrtu = $row['nama_orang_tua'] ?? '';
-
-                $isValid = empty($errors);
-
-                $rows[] = [
+                $rawItems[] = [
                     'row_number' => $rowNumber,
-                    'is_valid' => $isValid,
-                    'errors' => $errors,
-                    'data' => [
-                        'posyandu_id' => $posyanduId,
-                        'posyandu_nama' => $posyanduNama,
-                        'posyandu_input' => $posyanduInput,
-                        'nama' => $nama,
-                        'nik' => $nik,
-                        'tanggal_lahir' => $parsedDate ? $parsedDate->format('Y-m-d') : $tglLahir,
-                        'jenis_kelamin' => $jk,
-                        'berat_lahir_gram' => $beratGram,
-                        'status_bblr' => $statusBblr,
-                        'nama_orang_tua' => $namaOrtu,
-                    ],
+                    'row' => $row,
+                    'nik_clean' => ! empty($nikClean) ? $nikClean : null,
                 ];
             }
             fclose($handle);
+        }
+
+        $nikCounts = array_count_values(array_filter($fileNiks));
+
+        $rows = [];
+        foreach ($rawItems as $item) {
+            $rowNumber = $item['row_number'];
+            $row = $item['row'];
+            $nik = $item['nik_clean'];
+
+            $errors = [];
+
+            // 1. Posyandu validation (supports Posyandu Name or Posyandu ID)
+            $posyanduInput = trim($row['posyandu'] ?? $row['posyandu_id'] ?? '');
+            $posyanduObj = null;
+            $posyanduId = null;
+            $posyanduNama = null;
+
+            if (empty($posyanduInput)) {
+                $errors[] = 'Posyandu wajib diisi.';
+            } else {
+                if (is_numeric($posyanduInput)) {
+                    $posyanduObj = Posyandu::find((int) $posyanduInput);
+                }
+                if (! $posyanduObj) {
+                    $posyanduObj = Posyandu::where('nama', 'like', $posyanduInput)->first();
+                }
+                if (! $posyanduObj) {
+                    $posyanduObj = Posyandu::where('nama', 'like', "%{$posyanduInput}%")->first();
+                }
+
+                if ($posyanduObj) {
+                    $posyanduId = $posyanduObj->id;
+                    $posyanduNama = $posyanduObj->nama;
+                } else {
+                    $errors[] = "Posyandu '{$posyanduInput}' tidak ditemukan di sistem.";
+                }
+            }
+
+            // 2. Nama validation
+            $nama = trim($row['nama'] ?? '');
+            if (empty($nama)) {
+                $errors[] = 'Nama balita wajib diisi.';
+            }
+
+            // NIK Length validation
+            if (! empty($nik) && strlen($nik) > 20) {
+                $errors[] = 'NIK tidak boleh melebihi 20 karakter.';
+            }
+
+            // 3. Tanggal lahir validation (supports DD-MM-YYYY, YYYY-MM-DD, DD/MM/YYYY)
+            $tglLahir = trim($row['tanggal_lahir'] ?? '');
+            $parsedDate = null;
+            if (empty($tglLahir)) {
+                $errors[] = 'Tanggal lahir wajib diisi.';
+            } else {
+                try {
+                    if (preg_match('/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/', $tglLahir)) {
+                        $normalizedDate = str_replace('/', '-', $tglLahir);
+                        $parsedDate = Carbon::createFromFormat('d-m-Y', $normalizedDate);
+                    } else {
+                        $parsedDate = Carbon::parse($tglLahir);
+                    }
+
+                    if ($parsedDate->isFuture()) {
+                        $errors[] = 'Tanggal lahir tidak boleh di masa depan.';
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = 'Format tanggal lahir tidak valid (Gunakan DD-MM-YYYY atau YYYY-MM-DD).';
+                }
+            }
+
+            // 4. Jenis Kelamin
+            $jk = strtoupper(trim($row['jenis_kelamin'] ?? ''));
+            if (! in_array($jk, ['L', 'P'])) {
+                $errors[] = 'Jenis kelamin harus L (Laki-laki) atau P (Perempuan).';
+            }
+
+            // 5. Berat Lahir Gram
+            $beratGram = filter_var($row['berat_lahir_gram'] ?? null, FILTER_VALIDATE_INT);
+            if ($beratGram === false || $beratGram < 500 || $beratGram > 6000) {
+                $errors[] = 'Berat lahir (gram) harus berupa angka antara 500g - 6000g.';
+            }
+
+            // 6. Status BBLR
+            $rawBblr = strtolower(trim($row['status_bblr'] ?? ''));
+            $statusBblr = 'tidak';
+            if (in_array($rawBblr, ['bblr', '1', 'ya', 'true'])) {
+                $statusBblr = 'bblr';
+            } elseif (in_array($rawBblr, ['tidak_diketahui', 'unknown', '2'])) {
+                $statusBblr = 'tidak_diketahui';
+            } elseif (in_array($rawBblr, ['tidak', '0', 'tidak bblr', 'false', ''])) {
+                $statusBblr = 'tidak';
+            } else {
+                $errors[] = 'Status BBLR harus: tidak, bblr, atau tidak_diketahui.';
+            }
+
+            // 7. Nama Orang Tua
+            $namaOrtu = trim($row['nama_orang_tua'] ?? '');
+
+            // === 3 ATURAN VALIDASI DUPLIKASI DATA BALITA ===
+
+            // Rule 1a: Duplikat di Dalam File Import (In-File Check)
+            if (! empty($nik) && ($nikCounts[$nik] ?? 0) > 1) {
+                $errors[] = 'Duplikat di dalam file import.';
+            }
+
+            // Rule 1b: Pencocokan NIK dengan Database (DB NIK Match)
+            if (! empty($nik)) {
+                $nikExistsInDb = Anak::withoutGlobalScope('posyandu_scope')
+                    ->where('nik', $nik)
+                    ->exists();
+                if ($nikExistsInDb) {
+                    $errors[] = 'Data anak sudah terdaftar berdasarkan NIK.';
+                }
+            }
+
+            // Rule 1c: Pencocokan Komposit saat NIK Kosong (DB Soft Match)
+            if (empty($nik) && ! empty($nama) && $parsedDate && ! empty($namaOrtu)) {
+                $compositeExistsInDb = Anak::withoutGlobalScope('posyandu_scope')
+                    ->where('nama', 'like', $nama)
+                    ->whereDate('tanggal_lahir', $parsedDate->format('Y-m-d'))
+                    ->where('nama_orang_tua', 'like', $namaOrtu)
+                    ->exists();
+                if ($compositeExistsInDb) {
+                    $errors[] = 'Kemungkinan data anak duplikat.';
+                }
+            }
+
+            $isValid = empty($errors);
+
+            $rows[] = [
+                'row_number' => $rowNumber,
+                'is_valid' => $isValid,
+                'errors' => $errors,
+                'raw_csv' => [
+                    'nama' => $row['nama'] ?? '',
+                    'nik' => $row['nik'] ?? '',
+                    'tanggal_lahir' => $row['tanggal_lahir'] ?? '',
+                    'jenis_kelamin' => $row['jenis_kelamin'] ?? '',
+                    'berat_lahir_gram' => $row['berat_lahir_gram'] ?? '',
+                    'status_bblr' => $row['status_bblr'] ?? '',
+                    'nama_orang_tua' => $row['nama_orang_tua'] ?? '',
+                    'posyandu' => $row['posyandu'] ?? $row['posyandu_id'] ?? '',
+                ],
+                'data' => [
+                    'posyandu_id' => $posyanduId,
+                    'posyandu_nama' => $posyanduNama,
+                    'posyandu_input' => $posyanduInput,
+                    'nama' => $nama,
+                    'nik' => $nik,
+                    'tanggal_lahir' => $parsedDate ? $parsedDate->format('Y-m-d') : $tglLahir,
+                    'jenis_kelamin' => $jk,
+                    'berat_lahir_gram' => $beratGram,
+                    'status_bblr' => $statusBblr,
+                    'nama_orang_tua' => $namaOrtu,
+                ],
+            ];
         }
 
         $validCount = count(array_filter($rows, fn ($r) => $r['is_valid']));
@@ -259,6 +326,69 @@ class ImportExportController extends Controller
 
         return redirect()->route('import-export.index', ['tab' => 'import'])
             ->with('success', "File berhasil diunggah. Ditemukan {$validCount} baris valid dan {$errorCount} baris bermasalah.");
+    }
+
+    public function downloadFailedLog()
+    {
+        Gate::authorize('import-data');
+
+        $preview = session('import_preview_data');
+
+        if (! $preview || empty($preview['rows'])) {
+            return redirect()->route('import-export.index', ['tab' => 'import'])
+                ->withErrors(['import' => 'Tidak ada data pratinjau import. Silakan unggah file terlebih dahulu.']);
+        }
+
+        $failedRows = array_values(array_filter($preview['rows'], fn ($r) => ! $r['is_valid']));
+
+        if (empty($failedRows)) {
+            return redirect()->route('import-export.index', ['tab' => 'import'])
+                ->with('success', 'Seluruh baris data pada file valid, tidak ada baris yang gagal!');
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="baris_gagal_import.csv"',
+        ];
+
+        $callback = function () use ($failedRows) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($file, [
+                'nama',
+                'nik',
+                'tanggal_lahir',
+                'jenis_kelamin',
+                'berat_lahir_gram',
+                'status_bblr',
+                'nama_orang_tua',
+                'posyandu',
+                'alasan_gagal',
+            ]);
+
+            foreach ($failedRows as $row) {
+                $raw = $row['raw_csv'] ?? [];
+                $nikVal = ! empty($raw['nik']) ? '="'.$raw['nik'].'"' : (! empty($row['data']['nik']) ? '="'.$row['data']['nik'].'"' : '');
+
+                fputcsv($file, [
+                    $raw['nama'] ?? $row['data']['nama'],
+                    $nikVal,
+                    $raw['tanggal_lahir'] ?? $row['data']['tanggal_lahir'],
+                    $raw['jenis_kelamin'] ?? $row['data']['jenis_kelamin'],
+                    $raw['berat_lahir_gram'] ?? $row['data']['berat_lahir_gram'],
+                    $raw['status_bblr'] ?? $row['data']['status_bblr'],
+                    $raw['nama_orang_tua'] ?? $row['data']['nama_orang_tua'],
+                    $raw['posyandu'] ?? $row['data']['posyandu_input'],
+                    implode('; ', $row['errors']),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function executeImport(Request $request)
@@ -276,8 +406,7 @@ class ImportExportController extends Controller
         foreach ($preview['rows'] as $row) {
             if ($row['is_valid']) {
                 $d = $row['data'];
-                $slugNama = Str::slug(substr($d['nama'], 0, 10));
-                $tokenAkses = 'BALITA-'.strtoupper($slugNama).'-'.sprintf('%02d', rand(10, 99));
+                $tokenAkses = Anak::generateTokenAkses();
 
                 Anak::create([
                     'posyandu_id' => $d['posyandu_id'],
@@ -390,11 +519,12 @@ class ImportExportController extends Controller
                 fputcsv($file, ['No', 'Posyandu', 'Nama Balita', 'NIK', 'Tanggal Lahir', 'Usia (Bulan)', 'Jenis Kelamin', 'Berat Lahir (Gram)', 'Status BBLR', 'Nama Orang Tua', 'Token Akses']);
 
                 foreach ($data as $i => $row) {
+                    $nikFormatted = ! empty($row->nik) ? '="'.$row->nik.'"' : '-';
                     fputcsv($file, [
                         $i + 1,
                         $row->posyandu->nama ?? '-',
                         $row->nama,
-                        $row->nik ?? '-',
+                        $nikFormatted,
                         $row->tanggal_lahir ? $row->tanggal_lahir->format('d/m/Y') : '-',
                         $row->usia_bulan,
                         $row->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
@@ -412,11 +542,12 @@ class ImportExportController extends Controller
                 fputcsv($file, ['No', 'Posyandu', 'Nama Balita', 'NIK', 'Usia Saat Ukur (Bulan)', 'Tanggal Ukur', 'Tinggi Badan (cm)', 'Berat Badan (kg)', 'Petugas Encater']);
 
                 foreach ($data as $i => $row) {
+                    $nikFormatted = ! empty($row->anak->nik) ? '="'.$row->anak->nik.'"' : '-';
                     fputcsv($file, [
                         $i + 1,
                         $row->anak->posyandu->nama ?? '-',
                         $row->anak->nama ?? '-',
-                        $row->anak->nik ?? '-',
+                        $nikFormatted,
                         $row->usia_bulan,
                         $row->tanggal_ukur ? $row->tanggal_ukur->format('d/m/Y') : '-',
                         $row->tinggi_cm,

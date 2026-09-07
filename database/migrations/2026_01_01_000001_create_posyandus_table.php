@@ -14,10 +14,17 @@ return new class extends Migration
             $table->string('wilayah')->nullable();
             $table->timestamps();
         });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('posyandu_id')->references('id')->on('posyandus')->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['posyandu_id']);
+        });
         Schema::dropIfExists('posyandus');
     }
 };

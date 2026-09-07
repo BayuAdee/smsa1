@@ -52,7 +52,7 @@ class ImportExportTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Import &amp; Export Data', false);
-        $response->assertSee('📥 Import Data Balita');
+        $response->assertSee('Import Data Balita');
     }
 
     public function test_kader_can_access_import_export_page_export_only()
@@ -62,7 +62,7 @@ class ImportExportTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Form Filter Export Laporan');
         // Import tab button is hidden for Kader
-        $response->assertDontSee('📥 Import Data Balita');
+        $response->assertDontSee('Import Data Balita');
     }
 
     public function test_bidan_can_download_import_template()
@@ -83,7 +83,7 @@ class ImportExportTest extends TestCase
     public function test_bidan_can_preview_and_validate_import_csv()
     {
         $csvContent = "nama,nik,tanggal_lahir,jenis_kelamin,berat_lahir_gram,status_bblr,nama_orang_tua,posyandu\n".
-            "Budi Santoso,3201011234567890,12-05-2025,L,3400,tidak,Siti Aminah,Posyandu Mawar\n".
+            "Budi Santoso,=\"3201011234567890\",12-05-2025,L,3400,tidak,Siti Aminah,Posyandu Mawar\n".
             "Balita Error,3201010101010002,12-05-2025,X,200,salah,Ortu Error,Posyandu Tidak Ada\n";
 
         $file = UploadedFile::fake()->createWithContent('import.csv', $csvContent);
@@ -99,6 +99,7 @@ class ImportExportTest extends TestCase
         $this->assertEquals(2, $preview['total']);
         $this->assertEquals(1, $preview['valid_count']);
         $this->assertEquals(1, $preview['error_count']);
+        $this->assertEquals('3201011234567890', $preview['rows'][0]['data']['nik']);
     }
 
     public function test_kader_forbidden_from_previewing_import()
@@ -173,7 +174,7 @@ class ImportExportTest extends TestCase
             'jenis_kelamin' => 'L',
             'berat_lahir_gram' => 3100,
             'status_bblr' => 'tidak',
-            'token_akses' => 'BALITA-ANAKA-01',
+            'token_akses' => Anak::generateTokenAkses(),
             'status_aktif' => true,
         ]);
 
@@ -201,5 +202,72 @@ class ImportExportTest extends TestCase
         $responsePdf->assertStatus(200);
         $responsePdf->assertSee('Mode Pratinjau Cetak Laporan PDF');
         $responsePdf->assertSee('Posyandu Mawar'); // Proves Kader export was locked to Posyandu Mawar
+    }
+
+    public function test_duplicate_checks_in_preview_and_download_failed_rows()
+    {
+        // 1. Create an existing child in DB for DB NIK Match & DB Composite Match
+        Anak::create([
+            'posyandu_id' => $this->posyanduA->id,
+            'nama' => 'Siti Nurhaliza',
+            'nik' => '3201012202200001',
+            'tanggal_lahir' => '2024-05-15',
+            'jenis_kelamin' => 'P',
+            'berat_lahir_gram' => 2800,
+            'status_bblr' => 'tidak',
+            'nama_orang_tua' => 'Budi Sudarsono',
+            'token_akses' => Anak::generateTokenAkses(),
+            'status_aktif' => true,
+        ]);
+
+        Anak::create([
+            'posyandu_id' => $this->posyanduA->id,
+            'nama' => 'Ahmad Yani',
+            'nik' => null,
+            'tanggal_lahir' => '2024-06-20',
+            'jenis_kelamin' => 'L',
+            'berat_lahir_gram' => 3200,
+            'status_bblr' => 'tidak',
+            'nama_orang_tua' => 'Joko Widodo',
+            'token_akses' => Anak::generateTokenAkses(),
+            'status_aktif' => true,
+        ]);
+
+        // 2. Prepare CSV with 3 duplicate scenarios:
+        // Row 1 & 2: In-file duplicate NIK ("3201019999990001")
+        // Row 3: DB NIK match ("3201012202200001")
+        // Row 4: DB composite match with empty NIK ("Ahmad Yani", "2024-06-20", "Joko Widodo")
+        // Row 5: Valid child ("Rani Tri", "3201018888880001")
+        $csvContent = "nama,nik,tanggal_lahir,jenis_kelamin,berat_lahir_gram,status_bblr,nama_orang_tua,posyandu\n".
+            "InFile Dup 1,3201019999990001,10-01-2024,L,3000,tidak,Ortu 1,Posyandu Mawar\n".
+            "InFile Dup 2,3201019999990001,10-01-2024,L,3000,tidak,Ortu 1,Posyandu Mawar\n".
+            "Siti NIK DB,3201012202200001,15-05-2024,P,2800,tidak,Budi Sudarsono,Posyandu Mawar\n".
+            "Ahmad Yani,,20-06-2024,L,3200,tidak,Joko Widodo,Posyandu Mawar\n".
+            "Rani Tri,3201018888880001,01-01-2025,P,3100,tidak,Ortu Rani,Posyandu Mawar\n";
+
+        $file = UploadedFile::fake()->createWithContent('dup_import.csv', $csvContent);
+
+        $response = $this->actingAs($this->bidan)->post(route('import-export.preview'), [
+            'file_import' => $file,
+        ]);
+
+        $response->assertRedirect(route('import-export.index', ['tab' => 'import']));
+        $preview = session('import_preview_data');
+
+        $this->assertEquals(5, $preview['total']);
+        $this->assertEquals(1, $preview['valid_count']);
+        $this->assertEquals(4, $preview['error_count']);
+
+        // Check error messages
+        $this->assertContains('Duplikat di dalam file import.', $preview['rows'][0]['errors']);
+        $this->assertContains('Duplikat di dalam file import.', $preview['rows'][1]['errors']);
+        $this->assertContains('Data anak sudah terdaftar berdasarkan NIK.', $preview['rows'][2]['errors']);
+        $this->assertContains('Kemungkinan data anak duplikat.', $preview['rows'][3]['errors']);
+
+        // Test downloading failed rows CSV
+        $downloadResponse = $this->actingAs($this->bidan)->get(route('import-export.download-failed'));
+        $downloadResponse->assertStatus(200);
+        $downloadResponse->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $downloadResponse->assertHeader('Content-Disposition', 'attachment; filename="baris_gagal_import.csv"');
     }
 }

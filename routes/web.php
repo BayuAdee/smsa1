@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Data Balita (CRUD)
     Route::get('/balita', [BalitaController::class, 'index'])->name('balita.index');
+    Route::get('/balita/search', [BalitaController::class, 'search'])->name('balita.search');
     Route::get('/balita/create', [BalitaController::class, 'create'])->name('balita.create');
     Route::post('/balita', [BalitaController::class, 'store'])->name('balita.store');
     Route::get('/balita/{id}', [BalitaController::class, 'show'])->name('balita.show');
@@ -76,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
     // Import & Export Data Dedicated Routes
     Route::get('/import-export', [ImportExportController::class, 'index'])->name('import-export.index');
     Route::get('/import-export/template', [ImportExportController::class, 'downloadTemplate'])->name('import-export.template');
+    Route::get('/import-export/download-failed', [ImportExportController::class, 'downloadFailedLog'])->name('import-export.download-failed');
     Route::post('/import-export/preview', [ImportExportController::class, 'previewImport'])->name('import-export.preview');
     Route::post('/import-export/execute', [ImportExportController::class, 'executeImport'])->name('import-export.execute');
     Route::get('/import-export/export', [ImportExportController::class, 'export'])->name('import-export.export');
