@@ -10,6 +10,8 @@
 - [x] **Fase 7: Fitur Client-Side (Search Real-time >=3 Karakter & Toggle Filter "Belum Diukur")** (Selesai)
 - [x] **Fase 8: Revisi Modul Manajemen Posyandu (Edit, Soft-Status Toggle, & Unique Validation)** (Selesai)
 - [x] **Fase 9: Dedicated Menu & Halaman Import/Export Data Berbasis Role** (Selesai)
+- [x] **Fase 10: Refactoring Logika Validasi Duplikasi Data Balita & Fitur Unduh Baris Gagal (.csv)** (Selesai)
+- [x] **Fase 11: Refactoring Fitur Search Balita dengan AJAX & Debounce (Minimal 3 Karakter, Zero Page Reload)** (Selesai)
 
 ---
 
@@ -88,4 +90,37 @@
   - Generasi berkas Excel (.csv stream) dan PDF pratinjau cetak resmi lengkap dengan blok tanda tangan Kader & Bidan Desa.
 - **Pengujian & Verifikasi**:
   - Penambahan Feature Test `ImportExportTest.php` (9 tests, 28 assertions).
-  - Total test suite aplikasi: 100% passing (30 tests, 109 assertions).
+
+### Fase 10: Refactoring Logika Validasi Duplikasi Data Balita & Fitur Unduh Baris Gagal (.csv)
+- **Tiga Aturan Validasi Duplikasi Data Balita**:
+  - **Rule 1a (In-File Check)**: Memeriksa NIK duplikat di dalam file unggahan yang sama -> Pesan error: *"Duplikat di dalam file import."*
+  - **Rule 1b (DB NIK Match)**: Memeriksa apakah NIK yang diisi sudah ada di database tabel `anaks` -> Pesan error: *"Data anak sudah terdaftar berdasarkan NIK."*
+  - **Rule 1c (DB Soft Match / Komposit saat NIK Kosong)**: Jika NIK kosong, memeriksa kombinasi (`nama` AND `tanggal_lahir` AND `nama_orang_tua`) di tabel `anaks` -> Pesan error: *"Kemungkinan data anak duplikat."*
+- **Mekanisme Eksekusi (Preview & Commit)**:
+  - Seluruh baris yang terkena error ditandai dengan Badge `[Error - Merah]` dan daftar pesan error spesifiknya pada Tabel Pratinjau (Preview).
+  - Ringkasan di atas tabel preview: `"Total: X Baris | Siap Import: Y Baris | Gagal/Duplikat: Z Baris"`.
+  - Tombol **"Konfirmasi Import Data"** secara otomatis mengabaikan/membuang baris yang INVALID dan hanya memasukkan baris yang VALID ke database.
+- **Fitur Download Error Log / Failed Rows (`route('import-export.download-failed')`)**:
+  - Tombol **"Unduh Baris Gagal (.csv)"** otomatis muncul jika terdapat baris data yang bermasalah (`error_count > 0`).
+  - Menghasilkan file CSV (`baris_gagal_import.csv`) yang HANYA berisi baris gagal beserta 1 kolom tambahan `alasan_gagal`.
+- **Pengujian & Verifikasi**:
+  - Pembaruan Feature Test `ImportExportTest.php` mencakup 3 skenario duplikasi dan pengunduhan CSV baris gagal.
+  - Total test suite aplikasi: 100% passing (31 tests, 124 assertions).
+
+### Fase 11: Refactoring Fitur Search Balita dengan AJAX & Debounce (Minimal 3 Karakter, Zero Page Reload)
+- **Aturan Input & Logika AJAX**:
+  - Request AJAX ke backend HANYA dikirim jika kata kunci minimal 3 karakter (`inputValue.length >= 3`).
+  - Jika 0–2 karakter atau dikosongkan, daftar balita bawaan (default list) ditampilkan kembali tanpa reload.
+  - Penanganan debounce (~300ms) untuk mencegah spamming HTTP request saat mengetik.
+  - Visual loading spinner halus di samping input field saat AJAX mengambil data.
+- **Backend API (`GET /balita/search`)**:
+  - Route baru `balita.search` di `routes/web.php` mengarah ke `BalitaController::search()`.
+  - Hak akses & scope data terisolasi otomatis (Kader hanya Posyandu miliknya, Bidan mencakup seluruh / terfilter per Posyandu).
+  - Pencarian pada `nama`, `nik`, `nama_orang_tua`, dan `token_akses` (`LIKE %keyword%`) dengan batas `limit(20)`.
+  - Mengembalikan struktur JSON lengkap mencakup status pengukuran untuk periode aktif.
+- **Rendering DOM Dinamis (Zero Page Reload)**:
+  - **Menu Data Balita (`balita/index.blade.php`)**: Menggunakan Alpine.js reactive state (`searchQuery`, `isLoading`, `isSearching`, `searchResults`) untuk merender ulang tabel desktop & kartu mobile secara instan tanpa reload.
+  - **Menu Pengukuran Bulanan (`pengukuran/index.blade.php`)**: AJAX search merender ulang kartu balita beserta status badge pengukuran (`Sudah` / `Belum Diukur`), mempertahankan fungsi input modal AJAX, dan menangani empty state.
+- **Pengujian & Verifikasi**:
+  - Penambahan Feature Test `BalitaSearchTest.php` (3 tests, 9 assertions).
+  - Total test suite aplikasi: 100% passing (34 tests, 134 assertions).

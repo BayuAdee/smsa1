@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('jenis_kelamin', ['L', 'P']);
             $table->integer('berat_lahir_gram')->default(3000);
             $table->enum('status_bblr', ['tidak', 'bblr', 'tidak_diketahui'])->default('tidak');
-            $table->uuid('token_akses')->unique();
+            $table->string('token_akses')->unique();
             $table->boolean('status_aktif')->default(true);
             $table->string('nama_orang_tua')->nullable();
             $table->timestamps();

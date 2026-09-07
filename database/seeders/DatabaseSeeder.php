@@ -2,17 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Anak;
+use App\Models\KbmReference;
+use App\Models\Pengukuran;
 use App\Models\Posyandu;
 use App\Models\User;
-use App\Models\Anak;
-use App\Models\Pengukuran;
 use App\Models\ZscoreReference;
-use App\Models\KbmReference;
-use App\Services\ZscoreService;
-use App\Services\GrowthFalteringService;
 use App\Services\SawCalculatorService;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -26,8 +24,8 @@ class DatabaseSeeder extends Seeder
             $header = fgetcsv($file);
             while (($row = fgetcsv($file)) !== false) {
                 KbmReference::updateOrCreate(
-                    ['usia_bulan' => (int)$row[0]],
-                    ['kbm_gram' => (int)$row[1]]
+                    ['usia_bulan' => (int) $row[0]],
+                    ['kbm_gram' => (int) $row[1]]
                 );
             }
             fclose($file);
@@ -43,19 +41,19 @@ class DatabaseSeeder extends Seeder
                     [
                         'indicator' => $row[0],
                         'jenis_kelamin' => $row[1],
-                        'usia_bulan' => (int)$row[2],
+                        'usia_bulan' => (int) $row[2],
                     ],
                     [
-                        'l' => (float)$row[3],
-                        'm' => (float)$row[4],
-                        's' => (float)$row[5],
-                        'sd3neg' => (float)$row[6],
-                        'sd2neg' => (float)$row[7],
-                        'sd1neg' => (float)$row[8],
-                        'sd0' => (float)$row[9],
-                        'sd1' => (float)$row[10],
-                        'sd2' => (float)$row[11],
-                        'sd3' => (float)$row[12],
+                        'l' => (float) $row[3],
+                        'm' => (float) $row[4],
+                        's' => (float) $row[5],
+                        'sd3neg' => (float) $row[6],
+                        'sd2neg' => (float) $row[7],
+                        'sd1neg' => (float) $row[8],
+                        'sd0' => (float) $row[9],
+                        'sd1' => (float) $row[10],
+                        'sd2' => (float) $row[11],
+                        'sd3' => (float) $row[12],
                     ]
                 );
             }
@@ -106,13 +104,13 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'L',
                 'berat_lahir_gram' => 2400,
                 'status_bblr' => 'bblr',
-                'token_akses' => 'BALITA-RAIHAN-01',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Fatimah',
                 'measurements' => [
                     ['bulan_lalu' => 2, 'tb' => 74.0, 'bb' => 8.2],
                     ['bulan_lalu' => 1, 'tb' => 74.8, 'bb' => 8.3],
                     ['bulan_lalu' => 0, 'tb' => 75.2, 'bb' => 8.4],
-                ]
+                ],
             ],
             [
                 'posyandu_id' => $posyandu1->id,
@@ -122,13 +120,13 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'P',
                 'berat_lahir_gram' => 3100,
                 'status_bblr' => 'tidak',
-                'token_akses' => 'BALITA-AISYAH-02',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Maryam',
                 'measurements' => [
                     ['bulan_lalu' => 2, 'tb' => 84.5, 'bb' => 11.5],
                     ['bulan_lalu' => 1, 'tb' => 85.2, 'bb' => 11.8],
                     ['bulan_lalu' => 0, 'tb' => 86.0, 'bb' => 12.1],
-                ]
+                ],
             ],
             [
                 'posyandu_id' => $posyandu1->id,
@@ -138,13 +136,13 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'L',
                 'berat_lahir_gram' => 2200,
                 'status_bblr' => 'bblr',
-                'token_akses' => 'BALITA-BILAL-03',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Nurul',
                 'measurements' => [
                     ['bulan_lalu' => 2, 'tb' => 69.5, 'bb' => 7.1],
                     ['bulan_lalu' => 1, 'tb' => 69.8, 'bb' => 7.1], // Faltering
                     ['bulan_lalu' => 0, 'tb' => 70.0, 'bb' => 7.0], // Weight loss
-                ]
+                ],
             ],
             [
                 'posyandu_id' => $posyandu1->id,
@@ -154,12 +152,12 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'P',
                 'berat_lahir_gram' => 2900,
                 'status_bblr' => 'tidak',
-                'token_akses' => 'BALITA-ZAHRA-04',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Zulaikha',
                 'measurements' => [
                     ['bulan_lalu' => 1, 'tb' => 65.0, 'bb' => 7.4],
                     ['bulan_lalu' => 0, 'tb' => 66.5, 'bb' => 7.8],
-                ]
+                ],
             ],
             // Posyandu 2
             [
@@ -170,13 +168,13 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'L',
                 'berat_lahir_gram' => 3200,
                 'status_bblr' => 'tidak',
-                'token_akses' => 'BALITA-DAFFA-05',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Ratna',
                 'measurements' => [
                     ['bulan_lalu' => 2, 'tb' => 77.0, 'bb' => 9.5],
                     ['bulan_lalu' => 1, 'tb' => 78.0, 'bb' => 9.8],
                     ['bulan_lalu' => 0, 'tb' => 79.0, 'bb' => 10.1],
-                ]
+                ],
             ],
             [
                 'posyandu_id' => $posyandu2->id,
@@ -186,13 +184,13 @@ class DatabaseSeeder extends Seeder
                 'jenis_kelamin' => 'P',
                 'berat_lahir_gram' => 2350,
                 'status_bblr' => 'bblr',
-                'token_akses' => 'BALITA-NABILA-06',
+                'token_akses' => Anak::generateTokenAkses(),
                 'nama_orang_tua' => 'Ibu Dewi',
                 'measurements' => [
                     ['bulan_lalu' => 2, 'tb' => 78.5, 'bb' => 8.8],
                     ['bulan_lalu' => 1, 'tb' => 78.8, 'bb' => 8.9],
                     ['bulan_lalu' => 0, 'tb' => 79.2, 'bb' => 8.9], // Faltering
-                ]
+                ],
             ],
         ];
 
@@ -204,7 +202,7 @@ class DatabaseSeeder extends Seeder
 
             foreach ($measurements as $m) {
                 $tgl = now()->subMonths($m['bulan_lalu'])->startOfMonth()->addDays(5)->format('Y-m-d');
-                $usia = (int) floor(\Carbon\Carbon::parse($anak->tanggal_lahir)->diffInMonths(\Carbon\Carbon::parse($tgl)));
+                $usia = (int) floor(Carbon::parse($anak->tanggal_lahir)->diffInMonths(Carbon::parse($tgl)));
 
                 Pengukuran::create([
                     'anak_id' => $anak->id,
@@ -218,7 +216,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // 6. Trigger SPK SAW Calculation for seeded measurements
-        $sawCalc = app(\App\Services\SawCalculatorService::class);
+        $sawCalc = app(SawCalculatorService::class);
         $sawCalc->calculateForPosyandu($posyandu1->id);
         $sawCalc->calculateForPosyandu($posyandu2->id);
     }

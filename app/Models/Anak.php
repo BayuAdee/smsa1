@@ -2,17 +2,32 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasPosyanduScope;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\Traits\HasPosyanduScope;
-use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class Anak extends Model
 {
     use HasFactory, HasPosyanduScope;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Anak $anak) {
+            if (empty($anak->token_akses)) {
+                $anak->token_akses = static::generateTokenAkses();
+            }
+        });
+    }
+
+    public static function generateTokenAkses(): string
+    {
+        return 'BALITA-'.strtoupper((string) Str::uuid());
+    }
 
     protected $fillable = [
         'posyandu_id',
