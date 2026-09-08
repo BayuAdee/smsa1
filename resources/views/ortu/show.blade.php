@@ -149,7 +149,7 @@
                 <p class="text-xs text-slate-400 mt-0.5">Riwayat pengukuran tinggi badan (cm) dan berat badan (kg) di Posyandu</p>
             </div>
 
-            @if($pengukurans->count() > 0)
+            @if($pengukuransChart->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Chart Tinggi Badan -->
                     <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
@@ -191,7 +191,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800/60 text-slate-200">
-                                @foreach($pengukurans as $p)
+                                @foreach($pengukuransTable as $p)
                                     <tr>
                                         <td class="py-3 px-3 font-medium">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</td>
                                         <td class="py-3 px-3">{{ $p->usia_bulan }} bln</td>
@@ -206,7 +206,7 @@
 
                     <!-- Cards Mobile -->
                     <div class="sm:hidden space-y-2.5">
-                        @foreach($pengukurans as $p)
+                        @foreach($pengukuransTable as $p)
                             <div class="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
                                 <div>
                                     <span class="block font-bold text-white">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</span>
@@ -228,11 +228,11 @@
         </div>
     </main>
 
-    @if($pengukurans->count() > 0)
+    @if($pengukuransChart->count() > 0)
     <script>
-        const labels = {!! json_encode($pengukurans->map(fn($p) => \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('M Y'))->toArray()) !!};
-        const dataTinggi = {!! json_encode($pengukurans->pluck('tinggi_cm')->toArray()) !!};
-        const dataBerat = {!! json_encode($pengukurans->pluck('berat_kg')->toArray()) !!};
+        const labels = {!! json_encode($pengukuransChart->map(fn($p) => \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('M Y'))->toArray()) !!};
+        const dataTinggi = {!! json_encode($pengukuransChart->pluck('tinggi_cm')->toArray()) !!};
+        const dataBerat = {!! json_encode($pengukuransChart->pluck('berat_kg')->toArray()) !!};
 
         // Chart Tinggi
         new Chart(document.getElementById('chartTinggi'), {

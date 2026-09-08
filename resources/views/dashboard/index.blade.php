@@ -40,7 +40,7 @@
 
     <!-- Stat Cards (1 Col Mobile, 3 Cols Desktop) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        
+
         <!-- Card 1: Total Balita -->
         <div class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
             <div class="flex items-center justify-between">
@@ -169,14 +169,14 @@
                                     <a href="{{ route('balita.show', $h->anak->id) }}" class="font-bold text-white hover:text-emerald-400 transition-colors block">
                                         {{ $h->anak->nama }}
                                     </a>
-                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                    {{-- <div class="flex items-center gap-1.5 mt-0.5">
                                         <span class="text-[11px] text-slate-400 font-mono">{{ $h->anak->token_akses }}</span>
                                         <button type="button" onclick="copyToClipboard('{{ $h->anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-500 hover:text-emerald-400 transition-colors p-0.5">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
                                         </button>
-                                    </div>
+                                    </div> --}}
                                 </td>
                                 <td class="py-3.5 px-4 text-slate-300">{{ $h->anak->posyandu->nama ?? '-' }}</td>
                                 <td class="py-3.5 px-4">

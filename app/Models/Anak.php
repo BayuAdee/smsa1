@@ -55,7 +55,7 @@ class Anak extends Model
 
     public function pengukurans(): HasMany
     {
-        return $this->hasMany(Pengukuran::class)->orderBy('tanggal_ukur', 'asc');
+        return $this->hasMany(Pengukuran::class)->orderBy('tanggal_ukur', 'desc');
     }
 
     public function pengukuranTerakhir(): HasOne

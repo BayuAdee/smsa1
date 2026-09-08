@@ -50,13 +50,14 @@ class OrtuController extends Controller
             ])
             ->firstOrFail();
 
-        $pengukurans = $anak->pengukurans;
+        $pengukuransChart = $anak->pengukurans->sortBy('tanggal_ukur')->values();
+        $pengukuransTable = $anak->pengukurans->sortByDesc('tanggal_ukur')->values();
         $hasilSaw = $anak->hasilSawTerakhir;
 
         // Formulate layman explanation for stunting & weight status
-        $laymanStatus = $this->getLaymanStatus($hasilSaw, $pengukurans->last());
+        $laymanStatus = $this->getLaymanStatus($hasilSaw, $pengukuransChart->last());
 
-        return view('ortu.show', compact('anak', 'pengukurans', 'hasilSaw', 'laymanStatus'));
+        return view('ortu.show', compact('anak', 'pengukuransChart', 'pengukuransTable', 'hasilSaw', 'laymanStatus'));
     }
 
     private function getLaymanStatus($hasilSaw, $pengukuranTerakhir)
