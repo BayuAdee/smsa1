@@ -249,9 +249,12 @@
                 <td>{{ number_format($row->z_bbu, 2) }} SD</td>
                 <td style="font-weight: bold; color: #047857;">{{ number_format($row->nilai_v, 4) }}</td>
                 <td>
-                    @if($row->kategori_risiko === 'tinggi')
+                    @php
+                        $katPdf = strtolower($row->kategori_risiko);
+                    @endphp
+                    @if(in_array($katPdf, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
                         <span class="badge badge-tinggi">RISIKO TINGGI</span>
-                    @elseif($row->kategori_risiko === 'sedang')
+                    @elseif($katPdf === 'sedang')
                         <span class="badge badge-sedang">RISIKO SEDANG</span>
                     @else
                         <span class="badge badge-rendah">RISIKO RENDAH</span>

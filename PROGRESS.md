@@ -12,6 +12,7 @@
 - [x] **Fase 9: Dedicated Menu & Halaman Import/Export Data Berbasis Role** (Selesai)
 - [x] **Fase 10: Refactoring Logika Validasi Duplikasi Data Balita & Fitur Unduh Baris Gagal (.csv)** (Selesai)
 - [x] **Fase 11: Refactoring Fitur Search Balita dengan AJAX & Debounce (Minimal 3 Karakter, Zero Page Reload)** (Selesai)
+- [x] **Fase 12: Refactoring Kategori Risiko Stunting Menjadi 3 Kategori (Data Preservation)** (Selesai)
 
 ---
 
@@ -124,3 +125,26 @@
 - **Pengujian & Verifikasi**:
   - Penambahan Feature Test `BalitaSearchTest.php` (3 tests, 9 assertions).
   - Total test suite aplikasi: 100% passing (34 tests, 134 assertions).
+
+### Fase 12: Refactoring Kategori Risiko Stunting Menjadi 3 Kategori (Data Preservation)
+- **Database Incremental Migration (`2026_09_08_000001_update_kategori_risiko_in_hasil_saw_table.php`)**:
+  - Menjalankan migrasi incremental tanpa `migrate:fresh` atau menghapus data.
+  - Query otomatis mengonversi data lama berkategori `'Sangat Tinggi'` menjadi `'Tinggi'`. Seluruh data Posyandu, Kader, Balita, dan Pengukuran tetap utuh 100%.
+- **Logika Klasifikasi & Recalculate (`SawCalculatorService.php` & `RecalculateSaw`)**:
+  - Penyederhanaan klasifikasi SPK SAW menjadi 3 level:
+    * `'Tinggi'` ($V_i < 0.78$): Prioritas utama penanganan stunting.
+    * `'Sedang'` ($0.78 \le V_i < 0.93$): Butuh pemantauan gizi & faltering.
+    * `'Rendah'` ($V_i \ge 0.93$): Tumbuh kembang optimal / indikator sehat.
+  - Pembuatan Artisan Command `php artisan saw:recalculate` untuk menghitung ulang secara otomatis seluruh record `hasil_saw` di database.
+- **Visual UI Badge & Dropdown Filter**:
+  - Tampilan warna badge terstandarisasi: Merah (`Tinggi`), Kuning/Amber (`Sedang`), Hijau Emerald (`Rendah`).
+  - Penambahan dropdown filter kategori (`Semua Kategori`, `Tinggi`, `Sedang`, `Rendah`) di Halaman Ranking SAW.
+  - Penyesuaian metrik card dashboard, laporan PDF, dan halaman portal orang tua (`OrtuController`).
+- **Penyempurnaan Kalkulasi Kriteria C1-C4 & Normalisasi Ideal SAW**:
+  - **C1 (TB/U)** & **C3 (BB/U)**: Menggunakan pemetaan skala risiko [1.0 - 4.0] berbasis standar WHO yang halus dan terkalibrasi, menggantikan transformasi arbitrary `10 - Z`.
+  - **C2 (Growth Faltering)**: Memperbaiki penarikan data 1–2 bulan sebelumnya agar benar-benar berurutan secara periodik relative terhadap periode ukur aktif ($p_0, p_1, p_2$), serta memastikan batasan tabel acuan KBM KMS (1–60 bulan).
+  - **C4 (Riwayat BBLR)**: Distandarkan pada skala [1.0 - 4.0].
+  - **Normalisasi Ideal Terstandarisasi**: Menggunakan referensi ideal $r_{ij} = 1.0 / rawC_{ij}$ sehingga nilai $V_i$ stabil, adil, dan tidak terdistorsi oleh variasi batch/kelompok Posyandu.
+- **Pengujian & Verifikasi**:
+  - Seluruh unit & feature test suite (34 tests, 134 assertions) lulus 100%.
+

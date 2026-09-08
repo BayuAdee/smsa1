@@ -61,7 +61,7 @@
         <div class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl relative overflow-hidden group hover:border-rose-500/30 transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div>
-                    <span class="block text-xs font-extrabold uppercase tracking-wider text-rose-300">Risiko Tinggi / Sangat Tinggi</span>
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-rose-300">Balita Berisiko Tinggi</span>
                     <span class="text-3xl sm:text-4xl font-black text-rose-400 mt-1.5 block tracking-tight">{{ number_format($totalRisikoTinggi) }}</span>
                     <span class="text-[11px] text-slate-400 mt-1 block">Periode {{ \Carbon\Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->translatedFormat('F Y') }}</span>
                 </div>
@@ -190,16 +190,15 @@
                                     {{ number_format($h->nilai_v, 4) }}
                                 </td>
                                 <td class="py-3.5 px-4">
-                                    @if($h->kategori_risiko === 'Sangat Tinggi')
+                                    @php
+                                        $kat = strtolower($h->kategori_risiko);
+                                    @endphp
+                                    @if(in_array($kat, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
                                         <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                            Sangat Tinggi
-                                        </span>
-                                    @elseif($h->kategori_risiko === 'Tinggi')
-                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                             Tinggi
                                         </span>
-                                    @elseif($h->kategori_risiko === 'Sedang')
-                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                    @elseif($kat === 'sedang')
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                             Sedang
                                         </span>
                                     @else
@@ -225,17 +224,20 @@
                                     {{ $h->anak->nama }}
                                 </a>
                             </div>
-                            @if($h->kategori_risiko === 'Sangat Tinggi')
+                            @php
+                                $katMob = strtolower($h->kategori_risiko);
+                            @endphp
+                            @if(in_array($katMob, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                    Sangat Tinggi
-                                </span>
-                            @elseif($h->kategori_risiko === 'Tinggi')
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                     Tinggi
+                                </span>
+                            @elseif($katMob === 'sedang')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    Sedang
                                 </span>
                             @else
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    {{ $h->kategori_risiko }}
+                                    Rendah
                                 </span>
                             @endif
                         </div>

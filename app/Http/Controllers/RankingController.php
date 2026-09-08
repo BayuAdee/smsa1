@@ -20,17 +20,22 @@ class RankingController extends Controller
     {
         $selectedBulan = (int) $request->input('bulan', now()->month);
         $selectedTahun = (int) $request->input('tahun', now()->year);
+        $selectedKategori = strtolower((string) $request->input('kategori', 'all'));
 
         // Get SAW Rankings sorted ASCENDING by nilai_v (V terkecil = Risiko Stunting Tertinggi = Rank 1)
-        // Filtered by selected periode
-        $rankings = HasilSaw::with(['anak.posyandu', 'pengukuran'])
+        // Filtered by selected periode & kategori
+        $query = HasilSaw::with(['anak.posyandu', 'pengukuran'])
             ->where('bulan_ukur', $selectedBulan)
             ->where('tahun_ukur', $selectedTahun)
             ->whereHas('anak', function ($q) {
                 $q->where('status_aktif', true);
-            })
-            ->orderBy('nilai_v', 'asc')
-            ->get();
+            });
+
+        if ($selectedKategori !== 'all') {
+            $query->whereRaw('LOWER(kategori_risiko) = ?', [$selectedKategori]);
+        }
+
+        $rankings = $query->orderBy('nilai_v', 'asc')->get();
 
         // Generate Opsi Periode
         $periodeOptions = [];
@@ -47,7 +52,7 @@ class RankingController extends Controller
             $current->addMonth();
         }
 
-        return view('ranking.index', compact('rankings', 'selectedBulan', 'selectedTahun', 'periodeOptions'));
+        return view('ranking.index', compact('rankings', 'selectedBulan', 'selectedTahun', 'selectedKategori', 'periodeOptions'));
     }
 
     public function recalculate(Request $request)

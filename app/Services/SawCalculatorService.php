@@ -24,7 +24,7 @@ class SawCalculatorService
      */
     public function hitungUntukPosyanduPeriode(?int $posyanduId, int $bulanUkur, int $tahunUkur): Collection
     {
-        $query = Anak::where('status_aktif', true);
+        $query = Anak::withoutGlobalScope('posyandu_scope')->where('status_aktif', true);
         if ($posyanduId) {
             $query->where('posyandu_id', $posyanduId);
         }
@@ -34,7 +34,8 @@ class SawCalculatorService
         // 1. Kumpulkan raw matrix untuk anak yang memiliki pengukuran pada periode ini
         $rawMatrix = [];
         foreach ($anaks as $anak) {
-            $pengukuran = Pengukuran::where('anak_id', $anak->id)
+            $pengukuran = Pengukuran::withoutGlobalScope('posyandu_scope')
+                ->where('anak_id', $anak->id)
                 ->where('bulan_ukur', $bulanUkur)
                 ->where('tahun_ukur', $tahunUkur)
                 ->first();
@@ -43,22 +44,37 @@ class SawCalculatorService
                 continue;
             }
 
-            // C1: TB/U Z-score
-            $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float) $pengukuran->tinggi_cm);
-            $rawC1 = 10.0 - $zTbu; // Kontinu: makin kerdil (Z < 0), raw cost makin tinggi
+            // C1: TB/U Z-score terstandarisasi ke skala risiko [1.0, 4.0] (Standar WHO)
+            $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->tinggi_cm);
+            if ($zTbu >= -2.0) {
+                $rawC1 = 1.0; // Normal / Tinggi (Tidak Stunting, Ideal)
+            } elseif ($zTbu >= -3.0) {
+                $rawC1 = round(2.0 + (-2.0 - $zTbu), 4); // Pendek / Stunted (Rentang 2.0 - 3.0)
+            } else {
+                $rawC1 = min(4.0, round(3.0 + (-3.0 - $zTbu), 4)); // Sangat Pendek / Severely Stunted (Rentang 3.0 - 4.0)
+            }
 
-            // C2: Growth Faltering
+            // C2: Growth Faltering (skor 1.0 - 4.0 dari kenaikan BB vs KBM KMS)
             $c2Data = $this->growthFalteringService->evaluate($anak, $pengukuran);
-            $rawC2 = (float) $c2Data['skor']; // 1, 2, 3, atau 4
+            $rawC2 = (float) $c2Data['skor'];
 
-            // C3: BB/U Z-score
-            $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, $pengukuran->usia_bulan, (float) $pengukuran->berat_kg);
-            $rawC3 = 10.0 - $zBbu; // Kontinu: makin kurus/underweight, raw cost makin tinggi
+            // C3: BB/U Z-score terstandarisasi ke skala risiko [1.0, 4.0] (Standar WHO)
+            $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->berat_kg);
+            if ($zBbu >= -2.0 && $zBbu <= 1.0) {
+                $rawC3 = 1.0; // Normal / Gizi Baik (Ideal)
+            } elseif ($zBbu >= -3.0 && $zBbu < -2.0) {
+                $rawC3 = round(2.0 + (-2.0 - $zBbu), 4); // Gizi Kurang / Underweight (Rentang 2.0 - 3.0)
+            } elseif ($zBbu < -3.0) {
+                $rawC3 = min(4.0, round(3.0 + (-3.0 - $zBbu), 4)); // Gizi Buruk / Severely Underweight (Rentang 3.0 - 4.0)
+            } else {
+                // $zBbu > 1.0 (Risiko Gizi Lebih / Overweight)
+                $rawC3 = min(2.0, round(1.0 + (($zBbu - 1.0) * 0.5), 4));
+            }
 
-            // C4: Riwayat BBLR
-            if ($anak->status_bblr === 'bblr' || $anak->berat_lahir_gram < 2500) {
+            // C4: Riwayat BBLR ke skala risiko [1.0, 4.0]
+            if ($anak->status_bblr === 'bblr' || ($anak->berat_lahir_gram && $anak->berat_lahir_gram < 2500)) {
                 $rawC4 = 4.0;
-            } elseif ($anak->status_bblr === 'tidak_diketahui') {
+            } elseif ($anak->status_bblr === 'tidak_diketahui' || empty($anak->berat_lahir_gram)) {
                 $rawC4 = 2.0;
             } else {
                 $rawC4 = 1.0;
@@ -81,12 +97,6 @@ class SawCalculatorService
             return collect();
         }
 
-        // 2. Cari nilai minimum untuk setiap kriteria COST
-        $minC1 = min(array_column($rawMatrix, 'c1'));
-        $minC2 = min(array_column($rawMatrix, 'c2'));
-        $minC3 = min(array_column($rawMatrix, 'c3'));
-        $minC4 = min(array_column($rawMatrix, 'c4'));
-
         // Bobot kriteria COST:
         $w1 = 0.40;
         $w2 = 0.25;
@@ -95,19 +105,18 @@ class SawCalculatorService
 
         $results = collect();
 
-        // 3. Hitung Normalisasi Cost: r_ij = min / raw_ij & Nilai V_i
+        // 2. Hitung Normalisasi Cost: r_ij = 1.0 / raw_ij & Nilai V_i
+        // (Seluruh kriteria terstandarisasi dengan nilai ideal terbaik = 1.0)
         foreach ($rawMatrix as $item) {
-            $r1 = $minC1 / max(0.0001, $item['c1']);
-            $r2 = $minC2 / max(0.0001, $item['c2']);
-            $r3 = $minC3 / max(0.0001, $item['c3']);
-            $r4 = $minC4 / max(0.0001, $item['c4']);
+            $r1 = round(1.0 / max(1.0, $item['c1']), 4);
+            $r2 = round(1.0 / max(1.0, $item['c2']), 4);
+            $r3 = round(1.0 / max(1.0, $item['c3']), 4);
+            $r4 = round(1.0 / max(1.0, $item['c4']), 4);
 
             $nilaiV = round(($w1 * $r1) + ($w2 * $r2) + ($w3 * $r3) + ($w4 * $r4), 4);
 
             // Kategori Risiko berdasarkan Nilai V (semakin kecil Nilai V = risiko stunting semakin tinggi)
             if ($nilaiV < 0.78) {
-                $kategori = 'Sangat Tinggi';
-            } elseif ($nilaiV < 0.86) {
                 $kategori = 'Tinggi';
             } elseif ($nilaiV < 0.93) {
                 $kategori = 'Sedang';
@@ -116,7 +125,7 @@ class SawCalculatorService
             }
 
             // Simpan atau update ke database (Upsert per anak & periode)
-            $hasil = HasilSaw::updateOrCreate(
+            $hasil = HasilSaw::withoutGlobalScope('posyandu_scope')->updateOrCreate(
                 [
                     'anak_id' => $item['anak']->id,
                     'bulan_ukur' => $bulanUkur,
@@ -131,10 +140,10 @@ class SawCalculatorService
                     'raw_c2' => $item['c2'],
                     'raw_c3' => $item['c3'],
                     'raw_c4' => $item['c4'],
-                    'r_c1' => round($r1, 4),
-                    'r_c2' => round($r2, 4),
-                    'r_c3' => round($r3, 4),
-                    'r_c4' => round($r4, 4),
+                    'r_c1' => $r1,
+                    'r_c2' => $r2,
+                    'r_c3' => $r3,
+                    'r_c4' => $r4,
                     'nilai_v' => $nilaiV,
                     'kategori_risiko' => $kategori,
                     'is_c2_estimasi' => $item['is_c2_estimasi'],

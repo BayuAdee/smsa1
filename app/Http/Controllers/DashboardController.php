@@ -23,7 +23,7 @@ class DashboardController extends Controller
 
         $totalRisikoTinggi = HasilSaw::where('bulan_ukur', $selectedBulan)
             ->where('tahun_ukur', $selectedTahun)
-            ->whereIn('kategori_risiko', ['Sangat Tinggi', 'Tinggi'])
+            ->whereIn('kategori_risiko', ['Tinggi', 'tinggi'])
             ->whereHas('anak', function ($q) {
                 $q->where('status_aktif', true);
             })->count();

@@ -18,9 +18,9 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <!-- Filter Periode Dropdown -->
-            <form action="{{ route('ranking.index') }}" method="GET" class="flex items-center gap-2">
-                <div class="relative w-full sm:w-auto min-w-[190px]">
+            <!-- Filter Periode & Kategori Dropdown -->
+            <form action="{{ route('ranking.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div class="relative w-full sm:w-auto min-w-[170px]">
                     <label for="ranking_periode_select" class="sr-only">Pilih Periode Ranking</label>
                     <select id="ranking_periode_select" name="periode_key" onchange="submitRankingPeriode(this)" class="w-full bg-slate-950 border border-slate-700 text-white font-extrabold text-xs rounded-2xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-pointer pr-10 shadow-inner min-h-[44px]">
                         @foreach($periodeOptions as $opt)
@@ -28,7 +28,7 @@
                                 $isSelected = ($opt['bulan'] === $selectedBulan && $opt['tahun'] === $selectedTahun);
                             @endphp
                             <option value="{{ $opt['bulan'] }}-{{ $opt['tahun'] }}" {{ $isSelected ? 'selected' : '' }}>
-                                Filter: {{ $opt['label'] }}
+                                Periode: {{ $opt['label'] }}
                             </option>
                         @endforeach
                     </select>
@@ -38,6 +38,23 @@
                         </svg>
                     </div>
                 </div>
+
+                <!-- Filter Kategori Dropdown -->
+                <div class="relative w-full sm:w-auto min-w-[150px]">
+                    <label for="ranking_kategori_select" class="sr-only">Filter Kategori Risiko</label>
+                    <select id="ranking_kategori_select" name="kategori" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-700 text-white font-extrabold text-xs rounded-2xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-pointer pr-10 shadow-inner min-h-[44px]">
+                        <option value="all" {{ ($selectedKategori ?? 'all') === 'all' ? 'selected' : '' }}>Semua Kategori</option>
+                        <option value="tinggi" {{ ($selectedKategori ?? '') === 'tinggi' ? 'selected' : '' }}>Tinggi (Merah)</option>
+                        <option value="sedang" {{ ($selectedKategori ?? '') === 'sedang' ? 'selected' : '' }}>Sedang (Kuning)</option>
+                        <option value="rendah" {{ ($selectedKategori ?? '') === 'rendah' ? 'selected' : '' }}>Rendah (Hijau)</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+
                 <input type="hidden" name="bulan" id="r_param_bulan" value="{{ $selectedBulan }}">
                 <input type="hidden" name="tahun" id="r_param_tahun" value="{{ $selectedTahun }}">
             </form>
@@ -167,16 +184,15 @@
 
                             <!-- Kategori Risiko Badge -->
                             <td class="py-4 px-4 text-center">
-                                @if($h->kategori_risiko === 'Sangat Tinggi')
+                                @php
+                                    $kat = strtolower($h->kategori_risiko);
+                                @endphp
+                                @if(in_array($kat, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
                                     <span class="px-3 py-1 rounded-full text-[11px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                        Sangat Tinggi
-                                    </span>
-                                @elseif($h->kategori_risiko === 'Tinggi')
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                         Tinggi
                                     </span>
-                                @elseif($h->kategori_risiko === 'Sedang')
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-black bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                @elseif($kat === 'sedang')
+                                    <span class="px-3 py-1 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                         Sedang
                                     </span>
                                 @else
@@ -206,17 +222,20 @@
                             </div>
                         </div>
 
-                        @if($h->kategori_risiko === 'Sangat Tinggi')
+                        @php
+                            $katMob = strtolower($h->kategori_risiko);
+                        @endphp
+                        @if(in_array($katMob, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
                             <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                Sangat Tinggi
-                            </span>
-                        @elseif($h->kategori_risiko === 'Tinggi')
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                 Tinggi
+                            </span>
+                        @elseif($katMob === 'sedang')
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Sedang
                             </span>
                         @else
                             <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                {{ $h->kategori_risiko }}
+                                Rendah
                             </span>
                         @endif
                     </div>
