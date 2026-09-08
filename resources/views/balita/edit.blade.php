@@ -5,14 +5,14 @@
 
 @section('content')
 
-<div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-xl">
-    
+<div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-8 shadow-xl dark:shadow-black/40 transition-colors duration-200">
+
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <h2 class="text-xl font-extrabold text-white">Edit Data Balita: {{ $anak->nama }}</h2>
-            <p class="text-xs text-slate-400 mt-1">Perbarui data identitas dan status kelahiran anak.</p>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Edit Data Balita: {{ $anak->nama }}</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Perbarui data identitas dan status kelahiran anak.</p>
         </div>
-        <span class="px-3 py-1 bg-slate-950 border border-slate-800 font-mono text-emerald-400 text-xs font-bold rounded-xl">
+        <span class="px-3 py-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl">
             {{ $anak->token_akses }}
         </span>
     </div>
@@ -23,8 +23,8 @@
 
         @if(Auth::user()->isBidan())
             <div>
-                <label for="posyandu_id" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Posyandu Wilayah</label>
-                <select name="posyandu_id" id="posyandu_id" required class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+                <label for="posyandu_id" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Posyandu Wilayah</label>
+                <select name="posyandu_id" id="posyandu_id" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
                     @foreach($posyandus as $pos)
                         <option value="{{ $pos->id }}" {{ old('posyandu_id', $anak->posyandu_id) == $pos->id ? 'selected' : '' }}>
                             {{ $pos->nama }} ({{ $pos->wilayah }})
@@ -35,36 +35,36 @@
         @endif
 
         <div>
-            <label for="nama" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Nama Lengkap Balita <span class="text-rose-400">*</span></label>
-            <input type="text" id="nama" name="nama" value="{{ old('nama', $anak->nama) }}" required 
-                   class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+            <label for="nama" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Nama Lengkap Balita <span class="text-rose-500 dark:text-rose-400">*</span></label>
+            <input type="text" id="nama" name="nama" value="{{ old('nama', $anak->nama) }}" required
+                   class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 text-slate-900 dark:text-white rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label for="nik" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">NIK</label>
+                <label for="nik" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">NIK</label>
                 <input type="text" id="nik" name="nik" value="{{ old('nik', $anak->nik) }}" inputmode="numeric"
-                       class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
             </div>
 
             <div>
-                <label for="tanggal_lahir" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Tanggal Lahir <span class="text-rose-400">*</span></label>
-                <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir', $anak->tanggal_lahir->format('Y-m-d')) }}" required 
-                       class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+                <label for="tanggal_lahir" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Tanggal Lahir <span class="text-rose-500 dark:text-rose-400">*</span></label>
+                <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir', $anak->tanggal_lahir->format('Y-m-d')) }}" required
+                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
             </div>
         </div>
 
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Jenis Kelamin <span class="text-rose-400">*</span></label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Jenis Kelamin <span class="text-rose-500 dark:text-rose-400">*</span></label>
             <div class="grid grid-cols-2 gap-3" x-data="{ gender: '{{ old('jenis_kelamin', $anak->jenis_kelamin) }}' }">
                 <label class="p-3.5 rounded-2xl border cursor-pointer flex items-center justify-center gap-2 min-h-[48px] transition-all"
-                       :class="gender === 'L' ? 'bg-sky-500/20 border-sky-400 text-sky-300 font-extrabold shadow-md' : 'bg-slate-950 border-slate-700 text-slate-400'">
+                       :class="gender === 'L' ? 'bg-sky-500/10 dark:bg-sky-500/20 border-sky-500 dark:border-sky-400 text-sky-700 dark:text-sky-300 font-extrabold shadow-md' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'">
                     <input type="radio" name="jenis_kelamin" value="L" x-model="gender" class="sr-only">
                     <span>Laki-Laki</span>
                 </label>
 
                 <label class="p-3.5 rounded-2xl border cursor-pointer flex items-center justify-center gap-2 min-h-[48px] transition-all"
-                       :class="gender === 'P' ? 'bg-pink-500/20 border-pink-400 text-pink-300 font-extrabold shadow-md' : 'bg-slate-950 border-slate-700 text-slate-400'">
+                       :class="gender === 'P' ? 'bg-pink-500/10 dark:bg-pink-500/20 border-pink-500 dark:border-pink-400 text-pink-700 dark:text-pink-300 font-extrabold shadow-md' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'">
                     <input type="radio" name="jenis_kelamin" value="P" x-model="gender" class="sr-only">
                     <span>Perempuan</span>
                 </label>
@@ -73,51 +73,51 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label for="berat_lahir_gram" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Berat Lahir (Gram)</label>
-                <input type="number" id="berat_lahir_gram" name="berat_lahir_gram" value="{{ old('berat_lahir_gram', $anak->berat_lahir_gram) }}" inputmode="numeric" required 
-                       class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+                <label for="berat_lahir_gram" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Berat Lahir (Gram)</label>
+                <input type="number" id="berat_lahir_gram" name="berat_lahir_gram" value="{{ old('berat_lahir_gram', $anak->berat_lahir_gram) }}" inputmode="numeric" required
+                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
             </div>
 
             <div>
-                <label for="nama_orang_tua" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Nama Ibu / Orang Tua</label>
+                <label for="nama_orang_tua" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Nama Ibu / Orang Tua</label>
                 <input type="text" id="nama_orang_tua" name="nama_orang_tua" value="{{ old('nama_orang_tua', $anak->nama_orang_tua) }}"
-                       class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white rounded-2xl p-3.5 text-sm min-h-[48px]">
+                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm min-h-[48px] transition-all">
             </div>
         </div>
 
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Riwayat BBLR (&lt; 2500g)</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Riwayat BBLR (&lt; 2500g)</label>
             <div class="grid grid-cols-3 gap-2.5" x-data="{ bblr: '{{ old('status_bblr', $anak->status_bblr) }}' }">
                 <label class="p-3 rounded-2xl border cursor-pointer text-center min-h-[48px] flex items-center justify-center text-xs transition-all"
-                       :class="bblr === 'tidak' ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-extrabold' : 'bg-slate-950 border-slate-700 text-slate-400'">
+                       :class="bblr === 'tidak' ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500 dark:border-emerald-400 text-emerald-700 dark:text-emerald-300 font-extrabold shadow-sm' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'">
                     <input type="radio" name="status_bblr" value="tidak" x-model="bblr" class="sr-only">
                     <span>Tidak (Normal)</span>
                 </label>
 
                 <label class="p-3 rounded-2xl border cursor-pointer text-center min-h-[48px] flex items-center justify-center text-xs transition-all"
-                       :class="bblr === 'bblr' ? 'bg-rose-500/20 border-rose-400 text-rose-300 font-extrabold' : 'bg-slate-950 border-slate-700 text-slate-400'">
+                       :class="bblr === 'bblr' ? 'bg-rose-500/10 dark:bg-rose-500/20 border-rose-500 dark:border-rose-400 text-rose-700 dark:text-rose-300 font-extrabold shadow-sm' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'">
                     <input type="radio" name="status_bblr" value="bblr" x-model="bblr" class="sr-only">
                     <span>Ya (BBLR)</span>
                 </label>
 
                 <label class="p-3 rounded-2xl border cursor-pointer text-center min-h-[48px] flex items-center justify-center text-xs transition-all"
-                       :class="bblr === 'tidak_diketahui' ? 'bg-slate-800 border-slate-600 text-slate-200 font-bold' : 'bg-slate-950 border-slate-700 text-slate-400'">
+                       :class="bblr === 'tidak_diketahui' ? 'bg-slate-200 dark:bg-slate-800 border-slate-400 dark:border-slate-600 text-slate-900 dark:text-slate-200 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'">
                     <input type="radio" name="status_bblr" value="tidak_diketahui" x-model="bblr" class="sr-only">
                     <span>Tidak Tahu</span>
                 </label>
             </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
-            <button type="button" onclick="if(confirm('Yakin ingin menghapus data balita ini?')) document.getElementById('delete-form').submit();" class="px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold rounded-2xl text-xs min-h-[44px]">
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <button type="button" onclick="if(confirm('Yakin ingin menghapus data balita ini?')) document.getElementById('delete-form').submit();" class="px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold rounded-2xl text-xs min-h-[44px] transition-all">
                 Hapus Data
             </button>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('balita.index') }}" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-2xl text-xs min-h-[44px] flex items-center">
+                <a href="{{ route('balita.index') }}" class="px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs min-h-[44px] flex items-center transition-all">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 text-slate-950 font-extrabold rounded-2xl shadow-lg text-xs min-h-[44px]">
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 text-slate-950 font-extrabold rounded-2xl shadow-lg text-xs min-h-[44px] transition-all">
                     Simpan Perubahan
                 </button>
             </div>
