@@ -5,18 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasil Perkembangan - {{ $anak->nama }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-200"
+      x-data="{
+          isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+          toggleTheme() {
+              this.isDark = !this.isDark;
+              if (this.isDark) {
+                  document.documentElement.classList.add('dark');
+                  localStorage.setItem('theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  localStorage.setItem('theme', 'light');
+              }
+          }
+      }">
 
     <!-- Simple Topbar for Ortu View -->
-    <header class="w-full border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
+    <header class="w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-200">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <a href="/" class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-300 p-0.5 shadow-md shadow-emerald-500/20">
@@ -27,48 +54,60 @@
                     </div>
                 </div>
                 <div>
-                    <span class="block text-base font-extrabold text-white tracking-tight">SiStunting <span class="text-emerald-400">SAW</span></span>
-                    <span class="block text-[10px] text-slate-400">Laporan Tumbuh Kembang</span>
+                    <span class="block text-base font-extrabold text-slate-900 dark:text-white tracking-tight">SiStunting <span class="text-emerald-600 dark:text-emerald-400">SAW</span></span>
+                    <span class="block text-[10px] text-slate-500 dark:text-slate-400">Laporan Tumbuh Kembang</span>
                 </div>
             </a>
 
-            <a href="/" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-all">
-                Cek Token Lain
-            </a>
+            <div class="flex items-center gap-2">
+                <button @click="toggleTheme()" type="button"
+                        class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+                        title="Ganti Tema">
+                    <svg x-show="isDark" x-cloak class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg x-show="!isDark" x-cloak class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                <a href="/" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-all border border-slate-200 dark:border-slate-700">
+                    Cek Token Lain
+                </a>
+            </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 pt-6 space-y-6">
 
         <!-- Child Profile Card -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl relative overflow-hidden">
+        <div class="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl dark:shadow-black/40 relative overflow-hidden transition-colors duration-200">
             <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-emerald-500/20">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-emerald-500/20 shrink-0">
                         {{ strtoupper(substr($anak->nama, 0, 1)) }}
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ $anak->nama }}</h1>
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $anak->jenis_kelamin === 'L' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-pink-500/20 text-pink-300 border border-pink-500/30' }}">
+                            <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $anak->nama }}</h1>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $anak->jenis_kelamin === 'L' ? 'bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30' : 'bg-pink-500/10 dark:bg-pink-500/20 text-pink-700 dark:text-pink-300 border border-pink-500/30' }}">
                                 {{ $anak->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
                             </span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                            Orang Tua: <span class="text-slate-200 font-medium">{{ $anak->nama_orang_tua ?? '-' }}</span> | 
-                            Posyandu: <span class="text-emerald-400 font-semibold">{{ $anak->posyandu->nama ?? '-' }}</span>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Orang Tua: <span class="text-slate-800 dark:text-slate-200 font-medium">{{ $anak->nama_orang_tua ?? '-' }}</span> |
+                            Posyandu: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $anak->posyandu->nama ?? '-' }}</span>
                         </p>
                     </div>
                 </div>
 
                 <!-- Token Code Badge -->
-                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-2.5 text-left sm:text-right">
-                    <span class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Token Akses Anak</span>
+                <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-2.5 text-left sm:text-right">
+                    <span class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Token Akses Anak</span>
                     <div class="inline-flex items-center gap-1.5 mt-0.5">
-                        <span class="font-mono text-xs sm:text-sm font-bold text-emerald-400 tracking-wider">{{ $anak->token_akses }}</span>
-                        <button type="button" onclick="copyToClipboard('{{ $anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-400 hover:text-emerald-400 transition-colors p-0.5">
+                        <span class="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">{{ $anak->token_akses }}</span>
+                        <button type="button" onclick="copyToClipboard('{{ $anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors p-0.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
@@ -78,26 +117,26 @@
             </div>
 
             <!-- Key Info Pills -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-800/80 text-xs">
-                <div class="bg-slate-950/40 p-3 rounded-2xl border border-slate-800/60">
-                    <span class="block text-slate-400 text-[11px]">Tanggal Lahir</span>
-                    <span class="font-bold text-white mt-0.5 block">{{ $anak->tanggal_lahir->translatedFormat('d M Y') }}</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 text-xs">
+                <div class="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                    <span class="block text-slate-500 dark:text-slate-400 text-[11px]">Tanggal Lahir</span>
+                    <span class="font-bold text-slate-900 dark:text-white mt-0.5 block">{{ $anak->tanggal_lahir->translatedFormat('d M Y') }}</span>
                 </div>
-                <div class="bg-slate-950/40 p-3 rounded-2xl border border-slate-800/60">
-                    <span class="block text-slate-400 text-[11px]">Usia Saat Ini</span>
-                    <span class="font-bold text-emerald-300 mt-0.5 block">{{ $anak->usia_bulan }} Bulan</span>
+                <div class="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                    <span class="block text-slate-500 dark:text-slate-400 text-[11px]">Usia Saat Ini</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-300 mt-0.5 block">{{ $anak->usia_bulan }} Bulan</span>
                 </div>
-                <div class="bg-slate-950/40 p-3 rounded-2xl border border-slate-800/60">
-                    <span class="block text-slate-400 text-[11px]">Berat Lahir</span>
-                    <span class="font-bold text-white mt-0.5 block">{{ number_format($anak->berat_lahir_gram) }} gram</span>
+                <div class="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                    <span class="block text-slate-500 dark:text-slate-400 text-[11px]">Berat Lahir</span>
+                    <span class="font-bold text-slate-900 dark:text-white mt-0.5 block">{{ number_format($anak->berat_lahir_gram) }} gram</span>
                 </div>
-                <div class="bg-slate-950/40 p-3 rounded-2xl border border-slate-800/60">
-                    <span class="block text-slate-400 text-[11px]">Riwayat BBLR</span>
-                    <span class="font-bold text-white mt-0.5 block">
+                <div class="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                    <span class="block text-slate-500 dark:text-slate-400 text-[11px]">Riwayat BBLR</span>
+                    <span class="font-bold text-slate-900 dark:text-white mt-0.5 block">
                         @if($anak->status_bblr === 'bblr')
-                            <span class="text-rose-400">Ya (&lt;2500g)</span>
+                            <span class="text-rose-600 dark:text-rose-400">Ya (&lt;2500g)</span>
                         @elseif($anak->status_bblr === 'tidak')
-                            <span class="text-emerald-400">Tidak (Normal)</span>
+                            <span class="text-emerald-600 dark:text-emerald-400">Tidak (Normal)</span>
                         @else
                             <span class="text-slate-400">Tidak Diketahui</span>
                         @endif
@@ -107,9 +146,9 @@
         </div>
 
         <!-- Layman Status & Advice Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl relative">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl dark:shadow-black/40 relative transition-colors duration-200">
             <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 {{ $laymanStatus['badge_color'] }} border">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 {{ $laymanStatus['badge_color'] }} border">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
@@ -118,23 +157,23 @@
                     <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold border mb-2 {{ $laymanStatus['badge_color'] }}">
                         {{ $laymanStatus['badge_text'] ?? 'Status Tumbuh Kembang' }}
                     </span>
-                    <h2 class="text-lg font-extrabold text-white mb-1.5">{{ $laymanStatus['title'] }}</h2>
-                    <p class="text-sm text-slate-300 leading-relaxed">{{ $laymanStatus['description'] }}</p>
+                    <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-1.5">{{ $laymanStatus['title'] }}</h2>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ $laymanStatus['description'] }}</p>
                 </div>
             </div>
 
             <!-- Tips for Parents -->
-            <div class="mt-5 pt-4 border-t border-slate-800/80">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800/80">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     Saran & Anjuran Gizi Kesehatan:
                 </h3>
                 <ul class="space-y-2">
                     @foreach($laymanStatus['tips'] as $tip)
-                        <li class="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 flex-shrink-0"></span>
+                        <li class="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 mt-2 shrink-0"></span>
                             <span>{{ $tip }}</span>
                         </li>
                     @endforeach
@@ -143,18 +182,18 @@
         </div>
 
         <!-- Growth Charts Section -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl dark:shadow-black/40 space-y-6 transition-colors duration-200">
             <div>
-                <h3 class="text-base font-extrabold text-white">Grafik Perkembangan Pertumbuhan</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Riwayat pengukuran tinggi badan (cm) dan berat badan (kg) di Posyandu</p>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Grafik Perkembangan Pertumbuhan</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Riwayat pengukuran tinggi badan (cm) dan berat badan (kg) di Posyandu</p>
             </div>
 
             @if($pengukuransChart->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Chart Tinggi Badan -->
-                    <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                        <h4 class="text-xs font-bold text-emerald-400 mb-3 flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <div class="bg-slate-50 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
                             Tinggi Badan (cm)
                         </h4>
                         <div class="relative h-56">
@@ -163,9 +202,9 @@
                     </div>
 
                     <!-- Chart Berat Badan -->
-                    <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                        <h4 class="text-xs font-bold text-teal-400 mb-3 flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+                    <div class="bg-slate-50 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-bold text-teal-600 dark:text-teal-400 mb-3 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-teal-500 dark:bg-teal-400"></span>
                             Berat Badan (kg)
                         </h4>
                         <div class="relative h-56">
@@ -175,29 +214,29 @@
                 </div>
 
                 <!-- Measurement History Table (Mobile Responsive Cards/Table) -->
-                <div class="pt-4 border-t border-slate-800">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Riwayat Catatan Posyandu</h4>
-                    
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Riwayat Catatan Posyandu</h4>
+
                     <!-- Table Desktop -->
-                    <div class="hidden sm:block overflow-x-auto">
+                    <div class="hidden sm:block overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
                         <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px]">
+                            <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] font-extrabold border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th class="py-2.5 px-3 rounded-l-xl">Tanggal Ukur</th>
+                                    <th class="py-2.5 px-3">Tanggal Ukur</th>
                                     <th class="py-2.5 px-3">Usia (Bulan)</th>
                                     <th class="py-2.5 px-3">Tinggi (cm)</th>
                                     <th class="py-2.5 px-3">Berat (kg)</th>
-                                    <th class="py-2.5 px-3 rounded-r-xl">Catatan</th>
+                                    <th class="py-2.5 px-3">Catatan</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-800/60 text-slate-200">
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60 text-slate-800 dark:text-slate-200 font-medium">
                                 @foreach($pengukuransTable as $p)
-                                    <tr>
-                                        <td class="py-3 px-3 font-medium">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</td>
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                        <td class="py-3 px-3 font-medium text-slate-900 dark:text-white">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</td>
                                         <td class="py-3 px-3">{{ $p->usia_bulan }} bln</td>
-                                        <td class="py-3 px-3 font-bold text-emerald-400">{{ number_format($p->tinggi_cm, 1) }} cm</td>
-                                        <td class="py-3 px-3 font-bold text-teal-400">{{ number_format($p->berat_kg, 1) }} kg</td>
-                                        <td class="py-3 px-3 text-slate-400">Pemeriksaan rutin</td>
+                                        <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">{{ number_format($p->tinggi_cm, 1) }} cm</td>
+                                        <td class="py-3 px-3 font-bold text-teal-600 dark:text-teal-400">{{ number_format($p->berat_kg, 1) }} kg</td>
+                                        <td class="py-3 px-3 text-slate-500 dark:text-slate-400">Pemeriksaan rutin</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -207,21 +246,21 @@
                     <!-- Cards Mobile -->
                     <div class="sm:hidden space-y-2.5">
                         @foreach($pengukuransTable as $p)
-                            <div class="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+                            <div class="bg-slate-50 dark:bg-slate-950/70 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shadow-sm">
                                 <div>
-                                    <span class="block font-bold text-white">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</span>
-                                    <span class="text-[11px] text-slate-400">Usia: {{ $p->usia_bulan }} bulan</span>
+                                    <span class="block font-bold text-slate-900 dark:text-white">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</span>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Usia: {{ $p->usia_bulan }} bulan</span>
                                 </div>
                                 <div class="text-right">
-                                    <span class="block font-bold text-emerald-400">TB: {{ number_format($p->tinggi_cm, 1) }} cm</span>
-                                    <span class="block font-bold text-teal-400">BB: {{ number_format($p->berat_kg, 1) }} kg</span>
+                                    <span class="block font-bold text-emerald-600 dark:text-emerald-400">TB: {{ number_format($p->tinggi_cm, 1) }} cm</span>
+                                    <span class="block font-bold text-teal-600 dark:text-teal-400">BB: {{ number_format($p->berat_kg, 1) }} kg</span>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
             @else
-                <div class="text-center py-8 text-slate-400 text-xs">
+                <div class="text-center py-8 text-slate-500 dark:text-slate-400 text-xs">
                     Belum ada data riwayat pengukuran untuk balita ini.
                 </div>
             @endif
@@ -234,6 +273,9 @@
         const dataTinggi = {!! json_encode($pengukuransChart->pluck('tinggi_cm')->toArray()) !!};
         const dataBerat = {!! json_encode($pengukuransChart->pluck('berat_kg')->toArray()) !!};
 
+        const gridColor = 'rgba(148, 163, 184, 0.15)';
+        const tickColor = '#94a3b8';
+
         // Chart Tinggi
         new Chart(document.getElementById('chartTinggi'), {
             type: 'line',
@@ -242,12 +284,12 @@
                 datasets: [{
                     label: 'Tinggi (cm)',
                     data: dataTinggi,
-                    borderColor: '#34d399',
-                    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     fill: true,
                     tension: 0.3,
                     borderWidth: 3,
-                    pointBackgroundColor: '#34d399',
+                    pointBackgroundColor: '#10b981',
                     pointRadius: 5
                 }]
             },
@@ -256,8 +298,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+                    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } }
                 }
             }
         });
@@ -270,12 +312,12 @@
                 datasets: [{
                     label: 'Berat (kg)',
                     data: dataBerat,
-                    borderColor: '#2dd4bf',
-                    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                    borderColor: '#14b8a6',
+                    backgroundColor: 'rgba(20, 184, 166, 0.1)',
                     fill: true,
                     tension: 0.3,
                     borderWidth: 3,
-                    pointBackgroundColor: '#2dd4bf',
+                    pointBackgroundColor: '#14b8a6',
                     pointRadius: 5
                 }]
             },
@@ -284,13 +326,14 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+                    y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } }
                 }
             }
         });
     </script>
     @endif
+
     <script>
     window.copyToClipboard = function(text, btn) {
         const doFeedback = () => {
@@ -299,7 +342,7 @@
             if (!svg && btnEl && btnEl.tagName === 'svg') svg = btnEl;
 
             if (svg) {
-                svg.outerHTML = `<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+                svg.outerHTML = `<svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
             }
 
             let toast = document.getElementById('global-copy-toast');

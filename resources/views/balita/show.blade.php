@@ -8,28 +8,28 @@
 <div class="space-y-6">
 
     <!-- Header Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl dark:shadow-black/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex items-center gap-4">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg">
                 {{ strtoupper(substr($anak->nama, 0, 1)) }}
             </div>
             <div>
-                <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ $anak->nama }}</h1>
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Posyandu: <span class="text-emerald-400 font-semibold">{{ $anak->posyandu->nama ?? '-' }}</span> | 
-                    Ibu: <span class="text-slate-200">{{ $anak->nama_orang_tua ?? '-' }}</span>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $anak->nama }}</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Posyandu: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $anak->posyandu->nama ?? '-' }}</span> |
+                    Ibu: <span class="text-slate-700 dark:text-slate-200 font-medium">{{ $anak->nama_orang_tua ?? '-' }}</span>
                 </p>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('ortu.show', ['token' => $anak->token_akses]) }}" target="_blank" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-bold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px]">
+            <a href="{{ route('ortu.show', ['token' => $anak->token_akses]) }}" target="_blank" class="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 font-bold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px] transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
                 <span>Lihat Tampilan Ortu</span>
             </a>
-            <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px]">
+            <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px] shadow-md transition-all active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -40,53 +40,54 @@
 
     <!-- Details Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Informasi Kelahiran & Token</h3>
+        <!-- Left Side: Birth Info & Token -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xl dark:shadow-black/40 space-y-4 transition-colors duration-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Informasi Kelahiran & Token</h3>
             <div class="space-y-3 text-xs">
-                <div class="flex justify-between items-center py-1.5 border-b border-slate-800/80">
-                    <span class="text-slate-400">Token Akses Ortu:</span>
-                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-xl">
-                        <span class="font-mono text-emerald-400 font-bold text-xs">{{ $anak->token_akses }}</span>
-                        <button type="button" onclick="copyToClipboard('{{ $anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-400 hover:text-emerald-400 transition-colors p-0.5">
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Token Akses Ortu:</span>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl">
+                        <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-xs">{{ $anak->token_akses }}</span>
+                        <button type="button" onclick="copyToClipboard('{{ $anak->token_akses }}', this)" title="Salin Token Akses" class="text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors p-0.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
                         </button>
                     </div>
                 </div>
-                <div class="flex justify-between py-1.5 border-b border-slate-800/80">
-                    <span class="text-slate-400">Tanggal Lahir:</span>
-                    <span class="font-bold text-white">{{ $anak->tanggal_lahir->translatedFormat('d M Y') }}</span>
+                <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Tanggal Lahir:</span>
+                    <span class="font-bold text-slate-900 dark:text-white">{{ $anak->tanggal_lahir->translatedFormat('d M Y') }}</span>
                 </div>
-                <div class="flex justify-between py-1.5 border-b border-slate-800/80">
-                    <span class="text-slate-400">Usia Sekarang:</span>
-                    <span class="font-bold text-emerald-300">{{ $anak->usia_bulan }} Bulan</span>
+                <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Usia Sekarang:</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-300">{{ $anak->usia_bulan }} Bulan</span>
                 </div>
-                <div class="flex justify-between py-1.5 border-b border-slate-800/80">
-                    <span class="text-slate-400">Jenis Kelamin:</span>
-                    <span class="font-bold text-white">{{ $anak->jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan' }}</span>
+                <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Jenis Kelamin:</span>
+                    <span class="font-bold text-slate-900 dark:text-white">{{ $anak->jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan' }}</span>
                 </div>
-                <div class="flex justify-between py-1.5 border-b border-slate-800/80">
-                    <span class="text-slate-400">Berat Lahir:</span>
-                    <span class="font-bold text-white">{{ number_format($anak->berat_lahir_gram) }} gram</span>
+                <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Berat Lahir:</span>
+                    <span class="font-bold text-slate-900 dark:text-white">{{ number_format($anak->berat_lahir_gram) }} gram</span>
                 </div>
                 <div class="flex justify-between py-1.5">
-                    <span class="text-slate-400">Status BBLR:</span>
-                    <span class="font-bold {{ $anak->status_bblr === 'bblr' ? 'text-rose-400' : 'text-emerald-400' }}">
+                    <span class="text-slate-500 dark:text-slate-400">Status BBLR:</span>
+                    <span class="font-bold {{ $anak->status_bblr === 'bblr' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
                         {{ ucfirst($anak->status_bblr) }}
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- History Measurement List -->
-        <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Riwayat Pengukuran Fisik ({{ $anak->pengukurans->count() }})</h3>
+        <!-- Right Side: History Measurement List -->
+        <div class="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xl dark:shadow-black/40 space-y-4 transition-colors duration-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Riwayat Pengukuran Fisik ({{ $anak->pengukurans->count() }})</h3>
 
             @if($anak->pengukurans->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px]">
+                        <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                             <tr>
                                 <th class="py-2.5 px-3 rounded-l-xl">Tanggal Ukur</th>
                                 <th class="py-2.5 px-3">Usia</th>
@@ -95,21 +96,21 @@
                                 <th class="py-2.5 px-3 rounded-r-xl">Petugas</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60 text-slate-200">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-800 dark:text-slate-200">
                             @foreach($anak->pengukurans as $p)
-                                <tr>
-                                    <td class="py-3 px-3 font-medium">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</td>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td class="py-3 px-3 font-medium text-slate-900 dark:text-white">{{ \Carbon\Carbon::parse($p->tanggal_ukur)->translatedFormat('d M Y') }}</td>
                                     <td class="py-3 px-3">{{ $p->usia_bulan }} bln</td>
-                                    <td class="py-3 px-3 font-bold text-emerald-400">{{ number_format($p->tinggi_cm, 1) }} cm</td>
-                                    <td class="py-3 px-3 font-bold text-teal-400">{{ number_format($p->berat_kg, 1) }} kg</td>
-                                    <td class="py-3 px-3 text-slate-400">{{ $p->pembuat->name ?? '-' }}</td>
+                                    <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">{{ number_format($p->tinggi_cm, 1) }} cm</td>
+                                    <td class="py-3 px-3 font-bold text-teal-600 dark:text-teal-400">{{ number_format($p->berat_kg, 1) }} kg</td>
+                                    <td class="py-3 px-3 text-slate-500 dark:text-slate-400">{{ $p->pembuat->name ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
             @else
-                <div class="text-center py-8 text-slate-400 text-xs">
+                <div class="text-center py-8 text-slate-500 dark:text-slate-400 text-xs">
                     Belum ada riwayat pengukuran fisik.
                 </div>
             @endif
