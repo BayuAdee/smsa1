@@ -70,7 +70,7 @@
                         </div>
                         <input type="text" id="login" name="login" value="{{ old('login') }}" required autofocus
                             class="w-full pl-11 pr-4 py-3.5 bg-slate-900/60 border border-slate-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-2xl text-white placeholder-slate-500 text-sm transition-all duration-200"
-                            placeholder="Contoh: kader1 atau bidan">
+                            placeholder="masukan username atau email">
                     </div>
                 </div>
 
@@ -105,7 +105,7 @@
         </div>
 
         <!-- Demo Accounts Hint Card -->
-        <div class="mt-6 p-4 bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-2xl text-xs text-slate-400">
+        {{-- <div class="mt-6 p-4 bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-2xl text-xs text-slate-400">
             <p class="font-bold text-slate-200 mb-1.5 flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -124,7 +124,7 @@
                     <span>Pass: <code class="text-white">password</code></span>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <div class="mt-6 text-center text-xs text-slate-400">
             <a href="/" class="hover:text-emerald-400 transition-colors inline-flex items-center gap-1">
