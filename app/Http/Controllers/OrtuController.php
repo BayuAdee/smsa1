@@ -74,13 +74,12 @@ class OrtuController extends Controller
             ];
         }
 
-        $kategori = $hasilSaw->kategori_risiko;
-        $zTbu = $hasilSaw->z_tbu;
+        $kategori = strtolower((string) $hasilSaw->kategori_risiko);
 
-        if ($kategori === 'Sangat Tinggi') {
+        if (in_array($kategori, ['tinggi', 'sangat tinggi', 'sangat_tinggi'])) {
             return [
                 'badge_color' => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-                'badge_text' => 'Perhatian Khusus Stunting',
+                'badge_text' => 'Perhatian Khusus - Risiko Tinggi',
                 'title' => 'Memerlukan Perhatian dan Pendampingan Gizi Segera',
                 'description' => 'Tinggi badan si kecil berada di bawah rata-rata pertumbuhan anak seusianya. Perlu konsultasi lebih lanjut dengan Bidan Desa dan Petugas Puskesmas.',
                 'tips' => [
@@ -89,10 +88,10 @@ class OrtuController extends Controller
                     'Pastikan imunisasi lengkap dan berikan vitamin A sesuai jadwal Posyandu.',
                 ],
             ];
-        } elseif ($kategori === 'Tinggi') {
+        } elseif ($kategori === 'sedang') {
             return [
                 'badge_color' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-                'badge_text' => 'Risiko Stunting Sedang - Perlu Pengawasan',
+                'badge_text' => 'Risiko Sedang - Perlu Pengawasan',
                 'title' => 'Pertumbuhan Tinggi Perlu Dioptimalkan',
                 'description' => 'Kenaikan tinggi/berat badan si kecil perlu dipantau secara ketat agar tidak tertinggal dari grafik tumbuh kembang ideal.',
                 'tips' => [
@@ -101,21 +100,10 @@ class OrtuController extends Controller
                     'Menjaga kebersihan lingkungan dan sanitasi air minum rumah tangga.',
                 ],
             ];
-        } elseif ($kategori === 'Sedang') {
-            return [
-                'badge_color' => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-                'badge_text' => 'Pertumbuhan Cukup Baik',
-                'title' => 'Tumbuh Kembang Berada pada Jalur Cukup Baik',
-                'description' => 'Pertumbuhan anak relatif stabil, terus pertahankan asupan nutrisi seimbang dan tingkatkan proteksi kesehatan.',
-                'tips' => [
-                    'Lanjutkan pemberian makanan bergizi seimbang 3 kali sehari.',
-                    'Jaga pola tidur anak yang cukup dan aktifitas bermain yang sehat.',
-                ],
-            ];
         } else {
             return [
                 'badge_color' => 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-                'badge_text' => 'Pertumbuhan Optimal & Sehat',
+                'badge_text' => 'Pertumbuhan Optimal & Sehat (Risiko Rendah)',
                 'title' => 'Selamat! Si Kecil Tumbuh Optimal & Sehat',
                 'description' => 'Tinggi dan berat badan si kecil sesuai dengan grafik pertumbuhan anak sehat WHO.',
                 'tips' => [
