@@ -13,7 +13,7 @@
             <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Month/Year SAW Engine</span>
             <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">Ranking Prioritas Penanganan Stunting (SAW)</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                SPK SAW COST dihitung per periode bulan: <strong class="text-emerald-600 dark:text-emerald-400">C1: TB/U Z-Score (40%)</strong>, <strong class="text-teal-600 dark:text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-600 dark:text-cyan-400">C3: BB/U Z-Score (25%)</strong>, dan <strong class="text-amber-600 dark:text-amber-400">C4: Riwayat BBLR (10%)</strong>.
+                SPK SAW COST dihitung per periode bulan: <strong class="text-emerald-600 dark:text-emerald-400">C1: TB/U Z-Score (45%)</strong>, <strong class="text-teal-600 dark:text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-600 dark:text-cyan-400">C3: BB/U Z-Score (20%)</strong>, dan <strong class="text-amber-600 dark:text-amber-400">C4: Riwayat BBLR (10%)</strong>.
             </p>
         </div>
 
