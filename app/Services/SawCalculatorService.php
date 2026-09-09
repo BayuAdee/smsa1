@@ -98,9 +98,9 @@ class SawCalculatorService
         }
 
         // Bobot kriteria COST:
-        $w1 = 0.40;
+        $w1 = 0.45;
         $w2 = 0.25;
-        $w3 = 0.25;
+        $w3 = 0.20;
         $w4 = 0.10;
 
         $results = collect();
@@ -116,9 +116,9 @@ class SawCalculatorService
             $nilaiV = round(($w1 * $r1) + ($w2 * $r2) + ($w3 * $r3) + ($w4 * $r4), 4);
 
             // Kategori Risiko berdasarkan Nilai V (semakin kecil Nilai V = risiko stunting semakin tinggi)
-            if ($nilaiV < 0.78) {
+            if ($nilaiV < 0.6374) {
                 $kategori = 'Tinggi';
-            } elseif ($nilaiV < 0.93) {
+            } elseif ($nilaiV < 0.7857) {
                 $kategori = 'Sedang';
             } else {
                 $kategori = 'Rendah';
