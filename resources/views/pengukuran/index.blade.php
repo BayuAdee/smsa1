@@ -13,7 +13,7 @@
             <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Posyandu Session</span>
                 <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5">Input Pengukuran Fisik Bulanan</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pilih periode pengukuran untuk mencatat atau menimpa (upsert) data tinggi & berat badan balita.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pilih periode pengukuran untuk mencatat data tinggi & berat badan balita.</p>
             </div>
 
             <!-- Form Filter Periode -->
@@ -57,9 +57,9 @@
                     </svg>
                 </div>
                 <div>
-                    <span class="text-slate-500 dark:text-slate-400 text-[11px] block">Status Kelengkapan Pengukuran Periode Ini:</span>
+                    <!-- <span class="text-slate-500 dark:text-slate-400 text-[11px] block">Status Kelengkapan Pengukuran Periode Ini:</span> -->
                     <span class="font-black text-slate-900 dark:text-white text-sm">
-                        <span id="stat_sudah" class="text-emerald-600 dark:text-emerald-400">{{ $sudahDiukur }}</span> dari {{ $totalBalita }} Balita Sudah Diukur ({{ $percent }}%)
+                        <span id="stat_sudah" class="text-emerald-600 dark:text-emerald-400">{{ $sudahDiukur }}</span> dari <span id="stat_total" data-total="{{ $totalBalita }}">{{ $totalBalita }}</span> Balita Sudah Diukur (<span id="stat_percent">{{ $percent }}</span>%)
                     </span>
                 </div>
             </div>
@@ -98,7 +98,7 @@
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-4">
             <div>
                 <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Daftar Balita Posyandu</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tekan nama/kartu balita untuk membuka modal input data</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tekan nama/kartu balita untuk melihat detail pengukuran</p>
             </div>
 
             <!-- Client-Side Controls (Search & Status Filter) -->
@@ -540,9 +540,31 @@ async function submitModalForm(e) {
             }
 
             if (card) {
+                const wasSudah = card.getAttribute('data-sudah') === '1';
+
                 card.setAttribute('data-sudah', '1');
                 card.classList.remove('border-slate-200', 'dark:border-slate-800');
                 card.classList.add('border-emerald-500/30');
+
+                // Jika sebelumnya belum diukur, tambahkan statistik real-time di atas
+                if (!wasSudah) {
+                    const statSudahEl = document.getElementById('stat_sudah');
+                    const statTotalEl = document.getElementById('stat_total');
+                    const statPercentEl = document.getElementById('stat_percent');
+                    const progressBarEl = document.getElementById('progress_bar');
+
+                    if (statSudahEl && statTotalEl) {
+                        let currentSudah = parseInt(statSudahEl.innerText) || 0;
+                        let totalBalita = parseInt(statTotalEl.getAttribute('data-total')) || parseInt(statTotalEl.innerText) || 1;
+
+                        currentSudah++;
+                        let newPercent = Math.round((currentSudah / totalBalita) * 100);
+
+                        statSudahEl.innerText = currentSudah;
+                        if (statPercentEl) statPercentEl.innerText = newPercent;
+                        if (progressBarEl) progressBarEl.style.width = newPercent + '%';
+                    }
+                }
             }
 
             // Show Toast Alert

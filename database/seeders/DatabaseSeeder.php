@@ -75,6 +75,33 @@ class DatabaseSeeder extends Seeder
             'role' => 'bidan',
         ]);
 
+        User::create([
+            'posyandu_id' => null,
+            'name' => 'Ny. Tonik Purwanto, A.Md.Keb',
+            'username' => 'ny_tonik',
+            'email' => 'tonik@posyandu.id',
+            'password' => Hash::make('bidan123'),
+            'role' => 'bidan',
+        ]);
+
+        User::create([
+            'posyandu_id' => null,
+            'name' => 'Bidan Desa Bentak',
+            'username' => 'bidan_desa',
+            'email' => 'bidan_desa@posyandu.id',
+            'password' => Hash::make('password123'),
+            'role' => 'bidan',
+        ]);
+
+        User::create([
+            'posyandu_id' => null,
+            'name' => 'Bidan 1 Desa Bentak',
+            'username' => 'bidan_bentak',
+            'email' => 'bentak@posyandu.id',
+            'password' => Hash::make('desabentak123'),
+            'role' => 'bidan',
+        ]);
+
         $kader1 = User::create([
             'posyandu_id' => $posyandu1->id,
             'name' => 'Kader Anisa Rahmawati',

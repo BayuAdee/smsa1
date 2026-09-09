@@ -10,8 +10,8 @@
     <!-- Header, Periode Dropdown, & Recalculate Button -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Month/Year SAW Engine</span>
-            <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">Ranking Prioritas Penanganan Stunting (SAW)</h2>
+            {{-- <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Month/Year SAW Engine</span> --}}
+            <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">Ranking Prioritas Penanganan Stunting</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
                 SPK SAW COST dihitung per periode bulan: <strong class="text-emerald-600 dark:text-emerald-400">C1: TB/U Z-Score (45%)</strong>, <strong class="text-teal-600 dark:text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-600 dark:text-cyan-400">C3: BB/U Z-Score (20%)</strong>, dan <strong class="text-amber-600 dark:text-amber-400">C4: Riwayat BBLR (10%)</strong>.
             </p>
@@ -40,7 +40,7 @@
                 </div>
 
                 <!-- Filter Kategori Dropdown -->
-                <div class="relative w-full sm:w-auto min-w-[150px]">
+                {{-- <div class="relative w-full sm:w-auto min-w-[150px]">
                     <label for="ranking_kategori_select" class="sr-only">Filter Kategori Risiko</label>
                     <select id="ranking_kategori_select" name="kategori" onchange="this.form.submit()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-extrabold text-xs rounded-2xl px-4 py-2.5 appearance-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-pointer pr-10 shadow-inner min-h-[44px]">
                         <option value="all" {{ ($selectedKategori ?? 'all') === 'all' ? 'selected' : '' }}>Semua Kategori</option>
@@ -53,7 +53,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
-                </div>
+                </div> --}}
 
                 <input type="hidden" name="bulan" id="r_param_bulan" value="{{ $selectedBulan }}">
                 <input type="hidden" name="tahun" id="r_param_tahun" value="{{ $selectedTahun }}">

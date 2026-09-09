@@ -144,7 +144,7 @@
                                 </div>
                                 <input type="text" id="token" name="token" value="{{ old('token') }}" required
                                     class="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 rounded-2xl text-slate-900 dark:text-white font-mono text-sm tracking-wider uppercase placeholder-slate-400 dark:placeholder-slate-500 transition-all"
-                                    placeholder="Contoh: BALITA-RAIHAN-01">
+                                    placeholder="BALITA-TOKEN-XXXX">
                             </div>
                         </div>
 
@@ -231,9 +231,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00-2 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/>
                             </svg>
                         </div>
-                        <h4 class="font-bold text-slate-900 dark:text-white text-base mb-1">Akurasi Standar WHO</h4>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-base mb-1">Mengacu Standar WHO</h4>
                         <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
-                            Kalkulasi Z-Score (TB/U & BB/U) terhitung otomatis mengikuti grafik baku baku kesehatan World Health Organization.
+                            Perhitungan Z-Score dilakukan secara otomatis dengan merujuk pada nilai standar World Health Organization
                         </p>
                     </div>
 
