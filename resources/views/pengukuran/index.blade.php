@@ -240,10 +240,10 @@
                 <!-- Tinggi Badan (cm) -->
                 <div>
                     <label for="modal_tinggi_cm" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        Tinggi Badan (cm) <span class="text-rose-600 dark:text-rose-400">*</span>
+                        Tinggi Badan (cm) <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">(Opsional)</span>
                     </label>
                     <div class="relative">
-                        <input type="number" step="0.1" min="30" max="150" name="tinggi_cm" id="modal_tinggi_cm" required
+                        <input type="number" step="0.1" min="30" max="150" name="tinggi_cm" id="modal_tinggi_cm"
                             placeholder="Contoh: 85.5"
                             class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 font-extrabold text-base rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner">
                         <span class="absolute right-4 top-3.5 text-xs font-bold text-slate-400 dark:text-slate-500">cm</span>
@@ -253,15 +253,16 @@
                 <!-- Berat Badan (kg) -->
                 <div>
                     <label for="modal_berat_kg" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        Berat Badan (kg) <span class="text-rose-600 dark:text-rose-400">*</span>
+                        Berat Badan (kg) <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">(Opsional)</span>
                     </label>
                     <div class="relative">
-                        <input type="number" step="0.1" min="1" max="40" name="berat_kg" id="modal_berat_kg" required
+                        <input type="number" step="0.1" min="1" max="40" name="berat_kg" id="modal_berat_kg"
                             placeholder="Contoh: 11.8"
                             class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-teal-600 dark:text-teal-400 font-extrabold text-base rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner">
                         <span class="absolute right-4 top-3.5 text-xs font-bold text-slate-400 dark:text-slate-500">kg</span>
                     </div>
                 </div>
+                <p class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">* Bisa diisi salah satu (Tinggi Badan atau Berat Badan).</p>
             </div>
 
             <!-- Error message container -->

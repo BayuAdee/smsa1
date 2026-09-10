@@ -38,9 +38,9 @@
         <!-- Inputs: Tinggi (cm) & Berat (kg) with decimal keypads -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label for="tinggi_cm" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Tinggi / Panjang Badan (cm) <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                <label for="tinggi_cm" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Tinggi / Panjang Badan (cm) <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">(Opsional)</span></label>
                 <div class="relative">
-                    <input type="number" id="tinggi_cm" name="tinggi_cm" value="{{ old('tinggi_cm') }}" step="0.1" inputmode="decimal" min="30" max="150" required
+                    <input type="number" id="tinggi_cm" name="tinggi_cm" value="{{ old('tinggi_cm') }}" step="0.1" inputmode="decimal" min="30" max="150"
                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 text-emerald-600 dark:text-emerald-400 font-extrabold placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 pr-12 text-sm min-h-[48px] outline-none transition-colors"
                            placeholder="Contoh: 75.5">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 text-xs font-bold">
@@ -50,9 +50,9 @@
             </div>
 
             <div>
-                <label for="berat_kg" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Berat Badan (kg) <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                <label for="berat_kg" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Berat Badan (kg) <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">(Opsional)</span></label>
                 <div class="relative">
-                    <input type="number" id="berat_kg" name="berat_kg" value="{{ old('berat_kg') }}" step="0.1" inputmode="decimal" min="1" max="40" required
+                    <input type="number" id="berat_kg" name="berat_kg" value="{{ old('berat_kg') }}" step="0.1" inputmode="decimal" min="1" max="40"
                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 text-teal-600 dark:text-teal-400 font-extrabold placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 pr-12 text-sm min-h-[48px] outline-none transition-colors"
                            placeholder="Contoh: 8.4">
                     <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 text-xs font-bold">
@@ -61,6 +61,7 @@
                 </div>
             </div>
         </div>
+        <p class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">* Bisa diisi salah satu (Tinggi Badan atau Berat Badan).</p>
 
         <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
             <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
