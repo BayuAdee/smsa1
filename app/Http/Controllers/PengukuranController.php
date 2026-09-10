@@ -80,18 +80,36 @@ class PengukuranController extends Controller
 
     public function store(Request $request)
     {
-        // Sanitisasi input desimal: ubah koma (,) menjadi titik (.) agar tidak gagal validasi
+        // Sanitisasi input desimal: ubah koma (,) menjadi titik (.) dan hilangkan string kosong
+        $tinggi = $request->input('tinggi_cm');
+        $berat  = $request->input('berat_kg');
+
+        if (is_numeric($tinggi) || (is_string($tinggi) && trim($tinggi) !== '')) {
+            $tinggi = str_replace(',', '.', trim((string) $tinggi));
+        } else {
+            $tinggi = null;
+        }
+
+        if (is_numeric($berat) || (is_string($berat) && trim($berat) !== '')) {
+            $berat = str_replace(',', '.', trim((string) $berat));
+        } else {
+            $berat = null;
+        }
+
         $request->merge([
-            'tinggi_cm' => is_string($request->input('tinggi_cm')) ? str_replace(',', '.', $request->input('tinggi_cm')) : $request->input('tinggi_cm'),
-            'berat_kg'  => is_string($request->input('berat_kg'))  ? str_replace(',', '.', $request->input('berat_kg'))  : $request->input('berat_kg'),
+            'tinggi_cm' => $tinggi,
+            'berat_kg'  => $berat,
         ]);
 
         $validated = $request->validate([
             'anak_id' => 'required|exists:anaks,id',
             'bulan_ukur' => 'required|integer|min:1|max:12',
             'tahun_ukur' => 'required|integer|min:2000|max:2099',
-            'tinggi_cm' => 'required|numeric|min:30|max:150',
-            'berat_kg' => 'required|numeric|min:1|max:40',
+            'tinggi_cm' => 'nullable|numeric|min:30|max:150|required_without:berat_kg',
+            'berat_kg' => 'nullable|numeric|min:1|max:40|required_without:tinggi_cm',
+        ], [
+            'tinggi_cm.required_without' => 'Isi minimal salah satu antara Tinggi Badan atau Berat Badan.',
+            'berat_kg.required_without'  => 'Isi minimal salah satu antara Tinggi Badan atau Berat Badan.',
         ]);
 
         $anak = Anak::findOrFail($validated['anak_id']);
