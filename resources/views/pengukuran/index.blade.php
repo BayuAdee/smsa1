@@ -586,6 +586,69 @@ async function submitModalForm(e) {
         spinner.classList.add('hidden');
     }
 }
+
+// Realtime Background Sync Across Devices (Polling 5 Detik)
+setInterval(async () => {
+    // Jangan poll jika modal sedang terbuka agar tidak mengganggu ketikan user
+    const modal = document.getElementById('inputModal');
+    if (modal && !modal.classList.contains('hidden')) return;
+
+    try {
+        const response = await fetch(window.location.href, {
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && Array.isArray(data.anaks)) {
+                data.anaks.forEach(item => {
+                    const card = document.getElementById('card_anak_' + item.id);
+                    const container = document.getElementById('status_container_' + item.id);
+                    if (!card || !container) return;
+
+                    if (item.sudah) {
+                        const tStr = item.tinggi_cm ? `${item.tinggi_cm} cm` : '-';
+                        const bStr = item.berat_kg ? `${item.berat_kg} kg` : '-';
+                        container.innerHTML = `
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 shadow-sm">
+                                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span>Sudah: ${tStr} / ${bStr}</span>
+                            </span>
+                        `;
+                        card.setAttribute('data-sudah', '1');
+                        card.classList.remove('border-slate-200', 'dark:border-slate-800');
+                        card.classList.add('border-emerald-500/30');
+                    }
+                });
+
+                // Update Statistik Header
+                const statSudahEl = document.getElementById('stat_sudah');
+                const statTotalEl = document.getElementById('stat_total');
+                const statPercentEl = document.getElementById('stat_percent');
+                const progressBarEl = document.getElementById('progress_bar');
+
+                if (statSudahEl && statTotalEl) {
+                    const total = data.totalBalita || 1;
+                    const sudah = data.sudahDiukur || 0;
+                    const percent = Math.round((sudah / total) * 100);
+
+                    statSudahEl.innerText = sudah;
+                    if (statPercentEl) statPercentEl.innerText = percent;
+                    if (progressBarEl) progressBarEl.style.width = percent + '%';
+                }
+
+                filterBalitaList();
+            }
+        }
+    } catch (e) {
+        // Silent catch for background polling
+    }
+}, 5000);
 </script>
 
 @endsection

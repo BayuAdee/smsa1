@@ -131,4 +131,59 @@ class PeriodPengukuranSawTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Periode Aktif');
     }
+
+    public function test_realtime_polling_json_response()
+    {
+        $kader = User::where('role', 'kader')->first();
+        $this->actingAs($kader);
+
+        $response = $this->getJson(route('pengukuran.index', ['bulan' => 8, 'tahun' => 2026]));
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'totalBalita',
+                'sudahDiukur',
+                'anaks' => [
+                    '*' => ['id', 'sudah', 'tinggi_cm', 'berat_kg'],
+                ],
+            ]);
+    }
+
+    public function test_partial_measurement_merging_preserved()
+    {
+        $kader = User::where('role', 'kader')->first();
+        $anak = Anak::where('posyandu_id', $kader->posyandu_id)->first();
+
+        $this->actingAs($kader);
+
+        // 1. Kader A di Stasiun Timbang: hanya isi Berat Badan (10.5 kg)
+        $response1 = $this->postJson(route('pengukuran.store'), [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'tinggi_cm' => '',
+            'berat_kg' => '10.5',
+        ]);
+        $response1->assertStatus(200);
+
+        $p1 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 10)->where('tahun_ukur', 2026)->first();
+        $this->assertNull($p1->tinggi_cm);
+        $this->assertEquals(10.5, $p1->berat_kg);
+
+        // 2. Kader B di Stasiun Tinggi: hanya isi Tinggi Badan (82.0 cm)
+        $response2 = $this->postJson(route('pengukuran.store'), [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'tinggi_cm' => '82.0',
+            'berat_kg' => '',
+        ]);
+        $response2->assertStatus(200);
+
+        // Berat 10.5 kgTIDAK tertimpa null, melainkan TERGABUNG dengan Tinggi 82.0 cm!
+        $p2 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 10)->where('tahun_ukur', 2026)->first();
+        $this->assertEquals(82.0, $p2->tinggi_cm);
+        $this->assertEquals(10.5, $p2->berat_kg);
+    }
 }

@@ -51,6 +51,25 @@ class PengukuranController extends Controller
             $current->addMonth();
         }
 
+        // Support JSON response for background realtime polling
+        if ($request->wantsJson()) {
+            $sudahDiukurCount = $anaks->filter(fn($a) => !is_null($a->pengukuran_periode))->count();
+            return response()->json([
+                'success' => true,
+                'totalBalita' => $anaks->count(),
+                'sudahDiukur' => $sudahDiukurCount,
+                'anaks' => $anaks->map(function ($anak) {
+                    $p = $anak->pengukuran_periode;
+                    return [
+                        'id' => $anak->id,
+                        'sudah' => !is_null($p),
+                        'tinggi_cm' => $p ? $p->tinggi_cm : null,
+                        'berat_kg'  => $p ? $p->berat_kg : null,
+                    ];
+                })->values(),
+            ]);
+        }
+
         return view('pengukuran.index', compact('anaks', 'selectedBulan', 'selectedTahun', 'periodeOptions'));
     }
 
@@ -61,6 +80,12 @@ class PengukuranController extends Controller
 
     public function store(Request $request)
     {
+        // Sanitisasi input desimal: ubah koma (,) menjadi titik (.) agar tidak gagal validasi
+        $request->merge([
+            'tinggi_cm' => is_string($request->input('tinggi_cm')) ? str_replace(',', '.', $request->input('tinggi_cm')) : $request->input('tinggi_cm'),
+            'berat_kg'  => is_string($request->input('berat_kg'))  ? str_replace(',', '.', $request->input('berat_kg'))  : $request->input('berat_kg'),
+        ]);
+
         $validated = $request->validate([
             'anak_id' => 'required|exists:anaks,id',
             'bulan_ukur' => 'required|integer|min:1|max:12',
@@ -85,6 +110,20 @@ class PengukuranController extends Controller
         $usiaBulan = (int) floor(Carbon::parse($anak->tanggal_lahir)->diffInMonths(Carbon::parse($tanggalUkur)));
         $usiaBulan = max(0, $usiaBulan);
 
+        // Cari pengukuran yang sudah ada untuk periode ini (jika ada) agar data lama tidak tertimpa null saat diisi secara terpisah
+        $existing = Pengukuran::where('anak_id', $anak->id)
+            ->where('bulan_ukur', $bulanUkur)
+            ->where('tahun_ukur', $tahunUkur)
+            ->first();
+
+        $tinggiSimpan = (array_key_exists('tinggi_cm', $validated) && !is_null($validated['tinggi_cm']))
+            ? $validated['tinggi_cm']
+            : ($existing ? $existing->tinggi_cm : null);
+
+        $beratSimpan = (array_key_exists('berat_kg', $validated) && !is_null($validated['berat_kg']))
+            ? $validated['berat_kg']
+            : ($existing ? $existing->berat_kg : null);
+
         // Timpa Data (UPSERT) per balita & periode
         $pengukuran = Pengukuran::updateOrCreate(
             [
@@ -95,8 +134,8 @@ class PengukuranController extends Controller
             [
                 'tanggal_ukur' => $tanggalUkur,
                 'usia_bulan' => $usiaBulan,
-                'tinggi_cm' => $validated['tinggi_cm'],
-                'berat_kg' => $validated['berat_kg'],
+                'tinggi_cm' => $tinggiSimpan,
+                'berat_kg'  => $beratSimpan,
                 'dibuat_oleh' => Auth::id(),
             ]
         );
