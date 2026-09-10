@@ -15,7 +15,7 @@
 
     <!-- Script Pencegah Kedip (Anti-FOUC) saat Halaman Di-load -->
     <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -34,7 +34,7 @@
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-white dark:selection:text-slate-950 transition-colors duration-200"
       x-data="{
           sidebarOpen: false,
-          isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+          isDark: localStorage.getItem('theme') === 'dark',
           toggleTheme() {
               this.isDark = !this.isDark;
               if (this.isDark) {

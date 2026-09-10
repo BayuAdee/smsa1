@@ -15,7 +15,7 @@
 
     <!-- Script Anti-FOUC (Pencegah Kedip saat Di-refresh) -->
     <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -35,7 +35,7 @@
 </head>
 <body class="bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 dark:from-emerald-950 dark:via-teal-950 dark:to-slate-950 min-h-screen flex items-center justify-center p-4 transition-colors duration-200 relative"
       x-data="{
-          isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+          isDark: localStorage.getItem('theme') === 'dark',
           toggleTheme() {
               this.isDark = !this.isDark;
               if (this.isDark) {
