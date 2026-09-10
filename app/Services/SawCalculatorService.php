@@ -45,13 +45,18 @@ class SawCalculatorService
             }
 
             // C1: TB/U Z-score terstandarisasi ke skala risiko [1.0, 4.0] (Standar WHO)
-            $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->tinggi_cm);
-            if ($zTbu >= -2.0) {
-                $rawC1 = 1.0; // Normal / Tinggi (Tidak Stunting, Ideal)
-            } elseif ($zTbu >= -3.0) {
-                $rawC1 = round(2.0 + (-2.0 - $zTbu), 4); // Pendek / Stunted (Rentang 2.0 - 3.0)
+            if ($pengukuran->tinggi_cm !== null && (float) $pengukuran->tinggi_cm > 0) {
+                $zTbu = $this->zscoreService->calculate('tbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->tinggi_cm);
+                if ($zTbu >= -2.0) {
+                    $rawC1 = 1.0; // Normal / Tinggi (Tidak Stunting, Ideal)
+                } elseif ($zTbu >= -3.0) {
+                    $rawC1 = round(2.0 + (-2.0 - $zTbu), 4); // Pendek / Stunted (Rentang 2.0 - 3.0)
+                } else {
+                    $rawC1 = min(4.0, round(3.0 + (-3.0 - $zTbu), 4)); // Sangat Pendek / Severely Stunted (Rentang 3.0 - 4.0)
+                }
             } else {
-                $rawC1 = min(4.0, round(3.0 + (-3.0 - $zTbu), 4)); // Sangat Pendek / Severely Stunted (Rentang 3.0 - 4.0)
+                $zTbu = 0.0;
+                $rawC1 = 1.0; // Default netral jika TB tidak diukur
             }
 
             // C2: Growth Faltering (skor 1.0 - 4.0 dari kenaikan BB vs KBM KMS)
@@ -59,16 +64,21 @@ class SawCalculatorService
             $rawC2 = (float) $c2Data['skor'];
 
             // C3: BB/U Z-score terstandarisasi ke skala risiko [1.0, 4.0] (Standar WHO)
-            $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->berat_kg);
-            if ($zBbu >= -2.0 && $zBbu <= 1.0) {
-                $rawC3 = 1.0; // Normal / Gizi Baik (Ideal)
-            } elseif ($zBbu >= -3.0 && $zBbu < -2.0) {
-                $rawC3 = round(2.0 + (-2.0 - $zBbu), 4); // Gizi Kurang / Underweight (Rentang 2.0 - 3.0)
-            } elseif ($zBbu < -3.0) {
-                $rawC3 = min(4.0, round(3.0 + (-3.0 - $zBbu), 4)); // Gizi Buruk / Severely Underweight (Rentang 3.0 - 4.0)
+            if ($pengukuran->berat_kg !== null && (float) $pengukuran->berat_kg > 0) {
+                $zBbu = $this->zscoreService->calculate('bbu', $anak->jenis_kelamin, (int) $pengukuran->usia_bulan, (float) $pengukuran->berat_kg);
+                if ($zBbu >= -2.0 && $zBbu <= 1.0) {
+                    $rawC3 = 1.0; // Normal / Gizi Baik (Ideal)
+                } elseif ($zBbu >= -3.0 && $zBbu < -2.0) {
+                    $rawC3 = round(2.0 + (-2.0 - $zBbu), 4); // Gizi Kurang / Underweight (Rentang 2.0 - 3.0)
+                } elseif ($zBbu < -3.0) {
+                    $rawC3 = min(4.0, round(3.0 + (-3.0 - $zBbu), 4)); // Gizi Buruk / Severely Underweight (Rentang 3.0 - 4.0)
+                } else {
+                    // $zBbu > 1.0 (Risiko Gizi Lebih / Overweight)
+                    $rawC3 = min(2.0, round(1.0 + (($zBbu - 1.0) * 0.5), 4));
+                }
             } else {
-                // $zBbu > 1.0 (Risiko Gizi Lebih / Overweight)
-                $rawC3 = min(2.0, round(1.0 + (($zBbu - 1.0) * 0.5), 4));
+                $zBbu = 0.0;
+                $rawC3 = 1.0; // Default netral jika BB tidak diukur
             }
 
             // C4: Riwayat BBLR ke skala risiko [1.0, 4.0]

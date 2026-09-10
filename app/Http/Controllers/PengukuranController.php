@@ -168,8 +168,8 @@ class PengukuranController extends Controller
                 'pengukuran' => [
                     'id' => $pengukuran->id,
                     'anak_id' => $pengukuran->anak_id,
-                    'tinggi_cm' => (float) $pengukuran->tinggi_cm,
-                    'berat_kg' => (float) $pengukuran->berat_kg,
+                    'tinggi_cm' => $pengukuran->tinggi_cm !== null ? (float) $pengukuran->tinggi_cm : null,
+                    'berat_kg'  => $pengukuran->berat_kg  !== null ? (float) $pengukuran->berat_kg  : null,
                     'usia_bulan' => $pengukuran->usia_bulan,
                     'bulan_ukur' => $pengukuran->bulan_ukur,
                     'tahun_ukur' => $pengukuran->tahun_ukur,
