@@ -84,6 +84,24 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
         </a>
     </div>
 
+    <!-- Tab Filter Status (Aktif vs Arsip / Lulus) -->
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <a href="{{ route('balita.index', ['status' => 'aktif', 'search' => $search]) }}"
+           class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 {{ ($status ?? 'aktif') === 'aktif' ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 shadow-sm' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent' }}">
+            <span>👶 Balita Aktif</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'aktif') === 'aktif' ? 'bg-emerald-500/20 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-200 font-extrabold' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
+                {{ $totalAktif ?? 0 }}
+            </span>
+        </a>
+        <a href="{{ route('balita.index', ['status' => 'arsip', 'search' => $search]) }}"
+           class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 {{ ($status ?? 'aktif') === 'arsip' ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 shadow-sm' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent' }}">
+            <span>🎓 Arsip / Lulus Posyandu</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'aktif') === 'arsip' ? 'bg-amber-500/20 dark:bg-amber-500/30 text-amber-700 dark:text-amber-200 font-extrabold' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
+                {{ $totalArsip ?? 0 }}
+            </span>
+        </a>
+    </div>
+
     <!-- 1. DEFAULT LIST VIEW (When search length < 3 or search not active) -->
     <div x-show="!isSearching">
         @if($anaks->count() > 0)
@@ -105,9 +123,20 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                         @foreach($anaks as $anak)
                             <tr class="balita-row hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                 <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                    <a href="{{ route('balita.show', $anak->id) }}" class="hover:text-emerald-600 dark:hover:text-emerald-400">
-                                        {{ $anak->nama }}
-                                    </a>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <a href="{{ route('balita.show', $anak->id) }}" class="hover:text-emerald-600 dark:hover:text-emerald-400">
+                                            {{ $anak->nama }}
+                                        </a>
+                                        @if($anak->is_siap_lulus)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30" title="Balita sudah berusia 5 tahun atau lebih, siap lulus Posyandu">
+                                                🎓 Siap Lulus (5+ Thn)
+                                            </span>
+                                        @elseif(! $anak->status_aktif)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30">
+                                                🎓 Diarsip / Lulus
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if($anak->nik)
                                         <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-normal">NIK: {{ $anak->nik }}</span>
                                     @endif
@@ -138,16 +167,33 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                                 </td>
                                 <td class="py-3.5 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" title="Input Ukur" class="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-xl transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                        </a>
+                                        @if($anak->status_aktif)
+                                            <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" title="Input Ukur" class="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-xl transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                            </a>
+                                        @endif
                                         <a href="{{ route('balita.edit', $anak->id) }}" title="Edit" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </a>
+                                        <form action="{{ route('balita.toggle-archive', $anak->id) }}" method="POST" class="inline" onsubmit="return confirm('{{ $anak->status_aktif ? 'Arsipkan / tandai lulus balita ini?' : 'Aktifkan kembali balita ini?' }}')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" title="{{ $anak->status_aktif ? 'Arsipkan (Lulus)' : 'Aktifkan Kembali' }}" class="p-2 {{ $anak->status_aktif ? 'bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' }} rounded-xl transition-colors">
+                                                @if($anak->status_aktif)
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2m-14 0v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                                    </svg>
+                                                @else
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                    </svg>
+                                                @endif
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -162,10 +208,21 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                     <div class="balita-card bg-slate-50/80 dark:bg-slate-950/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
                         <div class="flex items-center justify-between">
                             <div>
-                                <a href="{{ route('balita.show', $anak->id) }}" class="font-bold text-slate-900 dark:text-white text-sm hover:text-emerald-600 dark:hover:text-emerald-400">
-                                    {{ $anak->nama }}
-                                </a>
-                                <span class="block text-[11px] text-slate-500 dark:text-slate-400">Usia: <strong class="text-emerald-600 dark:text-emerald-400">{{ $anak->usia_bulan }} bln</strong></span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <a href="{{ route('balita.show', $anak->id) }}" class="font-bold text-slate-900 dark:text-white text-sm hover:text-emerald-600 dark:hover:text-emerald-400">
+                                        {{ $anak->nama }}
+                                    </a>
+                                    @if($anak->is_siap_lulus)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                                            🎓 Siap Lulus (5+ Thn)
+                                        </span>
+                                    @elseif(! $anak->status_aktif)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30">
+                                            🎓 Diarsip / Lulus
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Usia: <strong class="text-emerald-600 dark:text-emerald-400">{{ $anak->usia_bulan }} bln</strong></span>
                             </div>
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
                                 <span class="font-mono text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">{{ $anak->token_akses }}</span>
@@ -189,16 +246,27 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                         </div>
 
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/80">
-                            <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-extrabold rounded-xl text-xs flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                <span>Input Ukur</span>
-                            </a>
-                            <div class="flex items-center gap-1">
+                            @if($anak->status_aktif)
+                                <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-extrabold rounded-xl text-xs flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    <span>Input Ukur</span>
+                                </a>
+                            @else
+                                <span class="text-xs text-slate-400 font-medium italic">Lulus Posyandu</span>
+                            @endif
+                            <div class="flex items-center gap-1.5">
                                 <a href="{{ route('balita.edit', $anak->id) }}" class="p-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold">
                                     Edit
                                 </a>
+                                <form action="{{ route('balita.toggle-archive', $anak->id) }}" method="POST" class="inline" onsubmit="return confirm('{{ $anak->status_aktif ? 'Arsipkan / tandai lulus balita ini?' : 'Aktifkan kembali balita ini?' }}')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="p-2 {{ $anak->status_aktif ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }} rounded-xl text-xs font-semibold">
+                                        {{ $anak->status_aktif ? 'Arsipkan' : 'Aktifkan' }}
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

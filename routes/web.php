@@ -50,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/balita/{id}/edit', [BalitaController::class, 'edit'])->name('balita.edit');
     Route::put('/balita/{id}', [BalitaController::class, 'update'])->name('balita.update');
     Route::delete('/balita/{id}', [BalitaController::class, 'destroy'])->name('balita.destroy');
+    Route::patch('/balita/{id}/toggle-archive', [BalitaController::class, 'toggleArchive'])->name('balita.toggle-archive');
 
     // Input Pengukuran Bulanan
     Route::get('/pengukuran', [PengukuranController::class, 'index'])->name('pengukuran.index');

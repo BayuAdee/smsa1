@@ -77,4 +77,19 @@ class Anak extends Model
     {
         return (int) floor(Carbon::parse($this->tanggal_lahir)->diffInMonths(now()));
     }
+
+    public function getIsSiapLulusAttribute(): bool
+    {
+        return $this->status_aktif && $this->usia_bulan >= 60;
+    }
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status_aktif', true);
+    }
+
+    public function scopeArsip($query)
+    {
+        return $query->where('status_aktif', false);
+    }
 }

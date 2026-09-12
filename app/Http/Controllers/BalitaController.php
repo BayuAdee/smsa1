@@ -34,8 +34,18 @@ class BalitaController extends Controller
         }
 
         $user = Auth::user();
-        $query = Anak::with(['posyandu'])
-            ->where('status_aktif', true);
+        $statusParam = $request->input('status');
+
+        $query = Anak::with(['posyandu']);
+
+        if ($statusParam === 'arsip') {
+            $query->where('status_aktif', false);
+        } elseif ($statusParam === 'aktif') {
+            $query->where('status_aktif', true);
+        } elseif (! $statusParam) {
+            // Default search includes both or active based on context; let's default to active if not specified
+            $query->where('status_aktif', true);
+        }
 
         if ($user->isKader() && $user->posyandu_id) {
             $query->where('posyandu_id', $user->posyandu_id);
@@ -94,11 +104,14 @@ class BalitaController extends Controller
                 'posyandu_nama' => $anak->posyandu->nama ?? '-',
                 'usia_bulan' => $anak->usia_bulan,
                 'usia_periode' => $usiaPeriode,
+                'status_aktif' => (bool) $anak->status_aktif,
+                'is_siap_lulus' => (bool) $anak->is_siap_lulus,
                 'sudah_diukur' => $sudahDiukur,
                 'pengukuran' => $pengukuranData,
                 'show_url' => route('balita.show', $anak->id),
                 'edit_url' => route('balita.edit', $anak->id),
                 'create_pengukuran_url' => route('pengukuran.create', ['anak_id' => $anak->id]),
+                'toggle_archive_url' => route('balita.toggle-archive', $anak->id),
             ];
         });
 
@@ -112,9 +125,21 @@ class BalitaController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status', 'aktif');
+        $isAktif = $status === 'aktif';
+
+        $user = Auth::user();
+
+        // Hitung total untuk badge tab
+        $countQuery = Anak::query();
+        if ($user->isKader() && $user->posyandu_id) {
+            $countQuery->where('posyandu_id', $user->posyandu_id);
+        }
+        $totalAktif = (clone $countQuery)->where('status_aktif', true)->count();
+        $totalArsip = (clone $countQuery)->where('status_aktif', false)->count();
 
         $query = Anak::with(['posyandu', 'pengukuranTerakhir', 'hasilSawTerakhir'])
-            ->where('status_aktif', true);
+            ->where('status_aktif', $isAktif);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -128,7 +153,7 @@ class BalitaController extends Controller
         $anaks = $query->orderBy('nama', 'asc')->paginate(25)->withQueryString();
         $posyandus = Auth::user()->isBidan() ? Posyandu::all() : collect();
 
-        return view('balita.index', compact('anaks', 'posyandus', 'search'));
+        return view('balita.index', compact('anaks', 'posyandus', 'search', 'status', 'totalAktif', 'totalArsip'));
     }
 
     public function create()
@@ -221,5 +246,16 @@ class BalitaController extends Controller
         $anak->delete();
 
         return redirect()->route('balita.index')->with('success', "Data balita {$nama} telah dihapus.");
+    }
+
+    public function toggleArchive($id)
+    {
+        $anak = Anak::findOrFail($id);
+        $anak->status_aktif = ! $anak->status_aktif;
+        $anak->save();
+
+        $statusStr = $anak->status_aktif ? 'diaktifkan kembali' : 'diarsipkan (lulus Posyandu)';
+
+        return back()->with('success', "Data balita {$anak->nama} berhasil {$statusStr}.");
     }
 }
