@@ -29,12 +29,31 @@
                 </svg>
                 <span>Lihat Tampilan Ortu</span>
             </a>
-            <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px] shadow-md transition-all active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Tambah Pengukuran</span>
-            </a>
+            @if($anak->status_aktif)
+                <a href="{{ route('pengukuran.create', ['anak_id' => $anak->id]) }}" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px] shadow-md transition-all active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Tambah Pengukuran</span>
+                </a>
+            @endif
+            <form action="{{ route('balita.toggle-archive', $anak->id) }}" method="POST" class="inline" onsubmit="return confirm('{{ $anak->status_aktif ? 'Arsipkan / tandai lulus balita ini?' : 'Aktifkan kembali balita ini?' }}')">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="px-4 py-2.5 {{ $anak->status_aktif ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' }} font-bold rounded-2xl text-xs flex items-center gap-1.5 min-h-[44px] transition-all">
+                    @if($anak->status_aktif)
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2m-14 0v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                        </svg>
+                        <span>Arsipkan (Lulus)</span>
+                    @else
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Aktifkan Kembali</span>
+                    @endif
+                </button>
+            </form>
         </div>
     </div>
 
@@ -44,6 +63,22 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xl dark:shadow-black/40 space-y-4 transition-colors duration-200">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Informasi Kelahiran & Token</h3>
             <div class="space-y-3 text-xs">
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span class="text-slate-500 dark:text-slate-400">Status Keberadaan:</span>
+                    @if($anak->is_siap_lulus)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                            Siap Lulus (5+ Thn)
+                        </span>
+                    @elseif($anak->status_aktif)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                            Balita Aktif
+                        </span>
+                    @else
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/30">
+                            Diarsip / Lulus
+                        </span>
+                    @endif
+                </div>
                 <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/80">
                     <span class="text-slate-500 dark:text-slate-400">Token Akses Ortu:</span>
                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl">

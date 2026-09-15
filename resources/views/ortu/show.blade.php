@@ -79,6 +79,28 @@
 
     <main class="max-w-4xl mx-auto px-4 pt-6 space-y-6">
 
+        @if(! $anak->status_aktif || $anak->usia_bulan >= 60)
+            <!-- Graduation Announcement Banner -->
+            <div class="bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-500/30 rounded-3xl p-5 shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center text-2xl shrink-0">
+                        🎓
+                    </div>
+                    <div>
+                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            Selamat! {{ $anak->nama }} Telah Lulus dari Pelayanan Posyandu
+                        </h2>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                            Ananda telah menyelesaikan pemantauan tumbuh kembang balita (0–5 tahun). Seluruh riwayat kesehatan & grafik tumbuh kembang di bawah tetap tersimpan secara aman.
+                        </p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-amber-500/20 text-amber-700 dark:text-amber-200 border border-amber-500/30 rounded-xl text-xs font-bold shrink-0">
+                    LULUS POSYANDU
+                </span>
+            </div>
+        @endif
+
         <!-- Child Profile Card -->
         <div class="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl dark:shadow-black/40 relative overflow-hidden transition-colors duration-200">
             <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
