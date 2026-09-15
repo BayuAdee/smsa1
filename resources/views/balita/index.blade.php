@@ -88,14 +88,14 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
     <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <a href="{{ route('balita.index', ['status' => 'aktif', 'search' => $search]) }}"
            class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 {{ ($status ?? 'aktif') === 'aktif' ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 shadow-sm' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent' }}">
-            <span>👶 Balita Aktif</span>
+            <span>Balita Aktif</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'aktif') === 'aktif' ? 'bg-emerald-500/20 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-200 font-extrabold' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
                 {{ $totalAktif ?? 0 }}
             </span>
         </a>
         <a href="{{ route('balita.index', ['status' => 'arsip', 'search' => $search]) }}"
            class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 {{ ($status ?? 'aktif') === 'arsip' ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 shadow-sm' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent' }}">
-            <span>🎓 Arsip / Lulus Posyandu</span>
+            <span>Arsip / Lulus Posyandu</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'aktif') === 'arsip' ? 'bg-amber-500/20 dark:bg-amber-500/30 text-amber-700 dark:text-amber-200 font-extrabold' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
                 {{ $totalArsip ?? 0 }}
             </span>

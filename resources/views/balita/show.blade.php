@@ -67,15 +67,15 @@
                     <span class="text-slate-500 dark:text-slate-400">Status Keberadaan:</span>
                     @if($anak->is_siap_lulus)
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                            🎓 Siap Lulus (5+ Thn)
+                            Siap Lulus (5+ Thn)
                         </span>
                     @elseif($anak->status_aktif)
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                            👶 Balita Aktif
+                            Balita Aktif
                         </span>
                     @else
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/30">
-                            🎓 Diarsip / Lulus
+                            Diarsip / Lulus
                         </span>
                     @endif
                 </div>
