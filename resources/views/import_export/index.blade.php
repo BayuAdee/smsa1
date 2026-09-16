@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Import & Export Data')
-@section('page-title', '📥 Import & Export Data')
+@section('page-title', 'Import & Export Data')
 
 @section('content')
 <div x-data="{ activeTab: '{{ $activeTab }}' }" class="space-y-6">
