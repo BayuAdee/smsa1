@@ -108,9 +108,19 @@
             <strong style="color: #34d399;">Mode Pratinjau Cetak Laporan PDF</strong>
             <span style="font-size: 10px; color: #94a3b8; display: block;">Gunakan tombol di kanan untuk mencetak atau menyimpan ke format PDF.</span>
         </div>
-        <div>
-            <button onclick="window.print()" style="background: #10b981; color: #090d16; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px;">🖨️ Cetak / Simpan PDF</button>
-            <button onclick="window.close()" style="background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; margin-left: 8px;">Tutup</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="window.print()" style="background: #10b981; color: #090d16; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; display: inline-flex; align-items: center; gap: 6px;">
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span>Cetak / Simpan PDF</span>
+            </button>
+            <button onclick="window.close()" style="background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; display: inline-flex; align-items: center; gap: 6px;">
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Tutup</span>
+            </button>
         </div>
     </div>
 
