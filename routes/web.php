@@ -70,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Kelola Data Kader (CRUD - Khusus Bidan Desa)
     Route::get('/kader', [KaderController::class, 'index'])->name('kader.index');
+    Route::get('/kader/search', [KaderController::class, 'search'])->name('kader.search');
     Route::get('/kader/create', [KaderController::class, 'create'])->name('kader.create');
     Route::post('/kader', [KaderController::class, 'store'])->name('kader.store');
     Route::get('/kader/{id}/edit', [KaderController::class, 'edit'])->name('kader.edit');
