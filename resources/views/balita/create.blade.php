@@ -36,9 +36,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label for="nik" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">NIK (Opsional)</label>
-                <input type="text" id="nik" name="nik" value="{{ old('nik') }}" inputmode="numeric"
-                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm min-h-[48px] transition-all"
-                       placeholder="320101...">
+                <input type="text" id="nik" name="nik" value="{{ old('nik') }}" inputmode="numeric" maxlength="16"
+                       class="w-full bg-slate-50 dark:bg-slate-950 border @error('nik') border-rose-500 @else border-slate-300 dark:border-slate-700 @enderror focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm min-h-[48px] transition-all"
+                       placeholder="16 Digit Angka (Opsional)...">
+                @error('nik')
+                    <p class="text-xs text-rose-500 dark:text-rose-400 font-bold mt-1.5">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>

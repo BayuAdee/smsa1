@@ -171,7 +171,7 @@ class BalitaController extends Controller
 
         $rules = [
             'nama' => 'required|string|max:255',
-            'nik' => 'nullable|string|max:20',
+            'nik' => 'nullable|digits:16|unique:anaks,nik',
             'tanggal_lahir' => 'required|date|before_or_equal:today',
             'jenis_kelamin' => 'required|in:L,P',
             'berat_lahir_gram' => 'required|numeric|min:500|max:6000',
@@ -179,11 +179,16 @@ class BalitaController extends Controller
             'nama_orang_tua' => 'nullable|string|max:255',
         ];
 
+        $messages = [
+            'nik.digits' => 'NIK harus berisi tepat 16 digit angka.',
+            'nik.unique' => 'NIK ini sudah terdaftar untuk balita lain.',
+        ];
+
         if ($user->isBidan()) {
             $rules['posyandu_id'] = 'required|exists:posyandus,id';
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, $messages);
 
         if ($user->isKader()) {
             $validated['posyandu_id'] = $user->posyandu_id;
@@ -221,7 +226,7 @@ class BalitaController extends Controller
 
         $rules = [
             'nama' => 'required|string|max:255',
-            'nik' => 'nullable|string|max:20',
+            'nik' => 'nullable|digits:16|unique:anaks,nik,'.$anak->id,
             'tanggal_lahir' => 'required|date|before_or_equal:today',
             'jenis_kelamin' => 'required|in:L,P',
             'berat_lahir_gram' => 'required|numeric|min:500|max:6000',
@@ -229,11 +234,16 @@ class BalitaController extends Controller
             'nama_orang_tua' => 'nullable|string|max:255',
         ];
 
+        $messages = [
+            'nik.digits' => 'NIK harus berisi tepat 16 digit angka.',
+            'nik.unique' => 'NIK ini sudah terdaftar untuk balita lain.',
+        ];
+
         if ($user->isBidan()) {
             $rules['posyandu_id'] = 'required|exists:posyandus,id';
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, $messages);
         $anak->update($validated);
 
         return redirect()->route('balita.index')->with('success', "Data balita {$anak->nama} berhasil diperbarui.");
