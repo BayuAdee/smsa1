@@ -71,25 +71,16 @@
         </div>
     </div>
 
-    <!-- Alert Success Notification (AJAX or Session) -->
-    <div id="ajax_alert" class="hidden p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-between gap-2 shadow-lg animate-fade-in">
+    <!-- Alert Success Notification (AJAX Fast-UI) -->
+    <div id="ajax_alert" class="hidden alert-auto-dismiss p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-between gap-2 shadow-lg animate-fade-in transition-all duration-300">
         <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
             </svg>
             <span id="ajax_alert_text">Pengukuran berhasil disimpan!</span>
         </div>
-        <button onclick="document.getElementById('ajax_alert').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1">✕</button>
+        <button type="button" onclick="dismissAlert(this.closest('#ajax_alert'))" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1">✕</button>
     </div>
-
-    @if(session('success'))
-        <div class="p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
 
     <!-- Main Card Container & Filter Controls -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl dark:shadow-black/40 space-y-5 transition-colors duration-200">
@@ -302,6 +293,28 @@ let currentStatusFilter = 'all'; // 'all' or 'belum'
 let searchDebounceTimer = null;
 let initialGridHtml = '';
 let isAjaxSearchActive = false;
+let ajaxToastTimer = null;
+
+function showToastAlert(msg) {
+    const alertBox = document.getElementById('ajax_alert');
+    const alertText = document.getElementById('ajax_alert_text');
+    if (!alertBox) return;
+
+    if (alertText) alertText.innerText = msg;
+    alertBox.style.transition = 'all 300ms ease';
+    alertBox.style.opacity = '1';
+    alertBox.style.transform = 'translateY(0)';
+    alertBox.classList.remove('hidden');
+
+    if (ajaxToastTimer) clearTimeout(ajaxToastTimer);
+    ajaxToastTimer = setTimeout(() => {
+        if (window.dismissAlert) {
+            window.dismissAlert(alertBox);
+        } else {
+            alertBox.classList.add('hidden');
+        }
+    }, 4000);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('balita_grid');
@@ -611,10 +624,7 @@ async function resetModalData() {
             }
 
             // Toast Alert
-            const alertBox = document.getElementById('ajax_alert');
-            const alertText = document.getElementById('ajax_alert_text');
-            if (alertText) alertText.innerText = data.message;
-            if (alertBox) alertBox.classList.remove('hidden');
+            showToastAlert(data.message);
 
             filterBalitaList();
         } else {
@@ -726,10 +736,7 @@ async function submitModalForm(e) {
             }
 
             // Show Toast Alert
-            const alertBox = document.getElementById('ajax_alert');
-            const alertText = document.getElementById('ajax_alert_text');
-            if (alertText) alertText.innerText = data.message;
-            if (alertBox) alertBox.classList.remove('hidden');
+            showToastAlert(data.message);
 
             // Re-apply client-side filter
             filterBalitaList();
