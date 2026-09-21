@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anak;
+use App\Models\HasilSaw;
 use App\Models\Pengukuran;
 use App\Services\SawCalculatorService;
 use Carbon\Carbon;
@@ -180,5 +181,48 @@ class PengukuranController extends Controller
         return redirect()
             ->route('pengukuran.index', ['bulan' => $bulanUkur, 'tahun' => $tahunUkur])
             ->with('success', "Pengukuran bulanan balita {$anak->nama} berhasil disimpan!");
+    }
+
+    public function destroy(Request $request)
+    {
+        $validated = $request->validate([
+            'anak_id' => 'required|exists:anaks,id',
+            'bulan_ukur' => 'required|integer|min:1|max:12',
+            'tahun_ukur' => 'required|integer|min:2000|max:2099',
+        ]);
+
+        $anak = Anak::findOrFail($validated['anak_id']);
+        $bulanUkur = (int) $validated['bulan_ukur'];
+        $tahunUkur = (int) $validated['tahun_ukur'];
+
+        $pengukuran = Pengukuran::where('anak_id', $anak->id)
+            ->where('bulan_ukur', $bulanUkur)
+            ->where('tahun_ukur', $tahunUkur)
+            ->first();
+
+        if ($pengukuran) {
+            // Hapus hasil SAW terkait untuk anak & periode ini
+            HasilSaw::where('anak_id', $anak->id)
+                ->where('bulan_ukur', $bulanUkur)
+                ->where('tahun_ukur', $tahunUkur)
+                ->delete();
+
+            $pengukuran->delete();
+
+            // Hitung ulang SPK SAW untuk posyandu pada periode tersebut
+            $this->sawCalculatorService->hitungUntukPosyanduPeriode($anak->posyandu_id, $bulanUkur, $tahunUkur);
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Data pengukuran balita {$anak->nama} untuk periode ini berhasil di-reset!",
+                'anak_id' => $anak->id,
+            ]);
+        }
+
+        return redirect()
+            ->route('pengukuran.index', ['bulan' => $bulanUkur, 'tahun' => $tahunUkur])
+            ->with('success', "Data pengukuran balita {$anak->nama} berhasil di-reset!");
     }
 }

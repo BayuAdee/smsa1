@@ -184,7 +184,7 @@
                             </div>
 
                             <button type="button"
-                                onclick="openInputModal({{ $anak->id }}, '{{ addslashes($anak->nama) }}', '{{ $sudah ? $p->tinggi_cm : '' }}', '{{ $sudah ? $p->berat_kg : '' }}', {{ $usiaPeriode }})"
+                                onclick="openInputModal({{ $anak->id }}, '{{ addslashes($anak->nama) }}', '{{ $sudah ? $p->tinggi_cm : '' }}', '{{ $sudah ? $p->berat_kg : '' }}', {{ $usiaPeriode }}, {{ $sudah ? 'true' : 'false' }})"
                                 class="py-1.5 px-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 min-h-[38px]">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $sudah ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4' }}"/>
@@ -268,18 +268,30 @@
             <!-- Error message container -->
             <div id="modal_error" class="hidden p-3 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs font-bold"></div>
 
-            <!-- Submit Button -->
-            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
-                <button type="button" onclick="closeInputModal()" class="py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs min-h-[42px] transition-colors">
-                    Batal
-                </button>
-                <button type="submit" id="btn_submit_modal" class="py-2.5 px-5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 min-h-[42px] shadow-lg transition-all active:scale-95">
-                    <svg id="spinner" class="hidden w-4 h-4 animate-spin text-slate-950" fill="none" viewBox="0 0 24 24">
+            <!-- Submit & Reset Buttons -->
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                <button type="button" id="btn_reset_modal" onclick="resetModalData()" class="hidden py-2.5 px-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 font-extrabold rounded-xl text-xs flex items-center gap-1.5 min-h-[42px] transition-all active:scale-95">
+                    <svg id="reset_spinner" class="hidden w-4 h-4 animate-spin text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Simpan Pengukuran</span>
+                    <svg id="reset_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    <span>Reset Data</span>
                 </button>
+                <div class="flex items-center gap-3 ml-auto">
+                    <button type="button" onclick="closeInputModal()" class="py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs min-h-[42px] transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" id="btn_submit_modal" class="py-2.5 px-5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 min-h-[42px] shadow-lg transition-all active:scale-95">
+                        <svg id="spinner" class="hidden w-4 h-4 animate-spin text-slate-950" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Simpan Pengukuran</span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -439,7 +451,7 @@ function renderSearchGridResults(items) {
                     </div>
 
                     <button type="button"
-                        onclick="openInputModal(${anak.id}, '${namaEscaped}', '${p ? p.tinggi_cm : ''}', '${p ? p.berat_kg : ''}', ${anak.usia_periode})"
+                        onclick="openInputModal(${anak.id}, '${namaEscaped}', '${p ? p.tinggi_cm : ''}', '${p ? p.berat_kg : ''}', ${anak.usia_periode}, ${sudah ? 'true' : 'false'})"
                         class="py-1.5 px-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 min-h-[38px]">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="${sudah ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4'}"/>
@@ -481,12 +493,21 @@ function filterBalitaList() {
     }
 }
 
-function openInputModal(id, nama, tinggi, berat, usiaBulan) {
+function openInputModal(id, nama, tinggi, berat, usiaBulan, isSudah = false) {
     document.getElementById('modal_anak_id').value = id;
     document.getElementById('modal_anak_nama').innerText = nama;
     document.getElementById('modal_tinggi_cm').value = tinggi || '';
     document.getElementById('modal_berat_kg').value = berat || '';
     document.getElementById('modal_error').classList.add('hidden');
+
+    const btnReset = document.getElementById('btn_reset_modal');
+    if (btnReset) {
+        if (isSudah || (tinggi !== '' && tinggi !== null && tinggi !== undefined) || (berat !== '' && berat !== null && berat !== undefined)) {
+            btnReset.classList.remove('hidden');
+        } else {
+            btnReset.classList.add('hidden');
+        }
+    }
 
     document.getElementById('inputModal').classList.remove('hidden');
     document.getElementById('modal_tinggi_cm').focus();
@@ -494,6 +515,124 @@ function openInputModal(id, nama, tinggi, berat, usiaBulan) {
 
 function closeInputModal() {
     document.getElementById('inputModal').classList.add('hidden');
+}
+
+async function resetModalData() {
+    const anakNama = document.getElementById('modal_anak_nama').innerText;
+    const anakId = document.getElementById('modal_anak_id').value;
+    const bulanUkur = document.getElementById('param_bulan').value;
+    const tahunUkur = document.getElementById('param_tahun').value;
+
+    if (!confirm(`Apakah Anda yakin ingin menghapus / mengosongkan data pengukuran ${anakNama} pada periode ini?`)) {
+        return;
+    }
+
+    const btnReset = document.getElementById('btn_reset_modal');
+    const resetIcon = document.getElementById('reset_icon');
+    const resetSpinner = document.getElementById('reset_spinner');
+    const errBox = document.getElementById('modal_error');
+
+    if (btnReset) btnReset.disabled = true;
+    if (resetIcon) resetIcon.classList.add('hidden');
+    if (resetSpinner) resetSpinner.classList.remove('hidden');
+    if (errBox) errBox.classList.add('hidden');
+
+    const formData = new FormData();
+    formData.append('_token', "{{ csrf_token() }}");
+    formData.append('_method', "DELETE");
+    formData.append('anak_id', anakId);
+    formData.append('bulan_ukur', bulanUkur);
+    formData.append('tahun_ukur', tahunUkur);
+
+    try {
+        const response = await fetch("{{ route('pengukuran.destroy') }}", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            closeInputModal();
+
+            const card = document.getElementById('card_anak_' + anakId);
+            const container = document.getElementById('status_container_' + anakId);
+
+            if (card) {
+                const wasSudah = card.getAttribute('data-sudah') === '1';
+
+                card.setAttribute('data-sudah', '0');
+                card.classList.remove('border-emerald-500/30');
+                card.classList.add('border-slate-200', 'dark:border-slate-800');
+
+                // Update tombol aksi pada card menjadi Input Data
+                const actionBtn = card.querySelector('button[onclick^="openInputModal"]');
+                if (actionBtn) {
+                    const escapedNama = anakNama.replace(/'/g, "\\'");
+                    actionBtn.setAttribute('onclick', `openInputModal(${anakId}, '${escapedNama}', '', '', 0, false)`);
+                    actionBtn.innerHTML = `
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>Input Data</span>
+                    `;
+                }
+
+                // Update statistik progres di header
+                if (wasSudah) {
+                    const statSudahEl = document.getElementById('stat_sudah');
+                    const statTotalEl = document.getElementById('stat_total');
+                    const statPercentEl = document.getElementById('stat_percent');
+                    const progressBarEl = document.getElementById('progress_bar');
+
+                    if (statSudahEl && statTotalEl) {
+                        let currentSudah = Math.max(0, (parseInt(statSudahEl.innerText) || 0) - 1);
+                        let totalBalita = parseInt(statTotalEl.getAttribute('data-total')) || parseInt(statTotalEl.innerText) || 1;
+                        let newPercent = totalBalita > 0 ? Math.round((currentSudah / totalBalita) * 100) : 0;
+
+                        statSudahEl.innerText = currentSudah;
+                        if (statPercentEl) statPercentEl.innerText = newPercent;
+                        if (progressBarEl) progressBarEl.style.width = newPercent + '%';
+                    }
+                }
+            }
+
+            if (container) {
+                container.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-pulse"></span>
+                        <span id="badge_text_${anakId}">Belum Diukur</span>
+                    </span>
+                `;
+            }
+
+            // Toast Alert
+            const alertBox = document.getElementById('ajax_alert');
+            const alertText = document.getElementById('ajax_alert_text');
+            if (alertText) alertText.innerText = data.message;
+            if (alertBox) alertBox.classList.remove('hidden');
+
+            filterBalitaList();
+        } else {
+            if (errBox) {
+                errBox.innerText = data.message || "Gagal menghapus data pengukuran.";
+                errBox.classList.remove('hidden');
+            }
+        }
+    } catch (err) {
+        if (errBox) {
+            errBox.innerText = "Gagal terhubung ke server. Silakan coba lagi.";
+            errBox.classList.remove('hidden');
+        }
+    } finally {
+        if (btnReset) btnReset.disabled = false;
+        if (resetIcon) resetIcon.classList.remove('hidden');
+        if (resetSpinner) resetSpinner.classList.add('hidden');
+    }
 }
 
 async function submitModalForm(e) {
@@ -530,12 +669,14 @@ async function submitModalForm(e) {
             const card = document.getElementById('card_anak_' + anakId);
 
             if (container) {
+                const tStr = data.pengukuran.tinggi_cm !== null ? `${data.pengukuran.tinggi_cm} cm` : '-';
+                const bStr = data.pengukuran.berat_kg !== null ? `${data.pengukuran.berat_kg} kg` : '-';
                 container.innerHTML = `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 shadow-sm">
                         <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Sudah: ${data.pengukuran.tinggi_cm} cm / ${data.pengukuran.berat_kg} kg</span>
+                        <span>Sudah: ${tStr} / ${bStr}</span>
                     </span>
                 `;
             }
@@ -546,6 +687,22 @@ async function submitModalForm(e) {
                 card.setAttribute('data-sudah', '1');
                 card.classList.remove('border-slate-200', 'dark:border-slate-800');
                 card.classList.add('border-emerald-500/30');
+
+                // Update tombol aksi pada card menjadi Edit Data
+                const actionBtn = card.querySelector('button[onclick^="openInputModal"]');
+                if (actionBtn) {
+                    const anakNama = document.getElementById('modal_anak_nama').innerText;
+                    const escapedNama = anakNama.replace(/'/g, "\\'");
+                    const tVal = data.pengukuran.tinggi_cm !== null ? data.pengukuran.tinggi_cm : '';
+                    const bVal = data.pengukuran.berat_kg !== null ? data.pengukuran.berat_kg : '';
+                    actionBtn.setAttribute('onclick', `openInputModal(${anakId}, '${escapedNama}', '${tVal}', '${bVal}', ${data.pengukuran.usia_bulan}, true)`);
+                    actionBtn.innerHTML = `
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        <span>Edit Data</span>
+                    `;
+                }
 
                 // Jika sebelumnya belum diukur, tambahkan statistik real-time di atas
                 if (!wasSudah) {
@@ -570,10 +727,11 @@ async function submitModalForm(e) {
 
             // Show Toast Alert
             const alertBox = document.getElementById('ajax_alert');
-            document.getElementById('ajax_alert_text').innerText = data.message;
-            alertBox.classList.remove('hidden');
+            const alertText = document.getElementById('ajax_alert_text');
+            if (alertText) alertText.innerText = data.message;
+            if (alertBox) alertBox.classList.remove('hidden');
 
-            // Re-apply client-side filter so if "Belum Diukur" was active, card updates state
+            // Re-apply client-side filter
             filterBalitaList();
         } else {
             errBox.innerText = data.message || "Terjadi kesalahan saat menyimpan data.";
@@ -624,6 +782,42 @@ setInterval(async () => {
                         card.setAttribute('data-sudah', '1');
                         card.classList.remove('border-slate-200', 'dark:border-slate-800');
                         card.classList.add('border-emerald-500/30');
+
+                        const actionBtn = card.querySelector('button[onclick^="openInputModal"]');
+                        if (actionBtn) {
+                            const cardNama = card.getAttribute('data-nama') || '';
+                            const escapedNama = cardNama.replace(/'/g, "\\'");
+                            actionBtn.setAttribute('onclick', `openInputModal(${item.id}, '${escapedNama}', '${item.tinggi_cm || ''}', '${item.berat_kg || ''}', 0, true)`);
+                            actionBtn.innerHTML = `
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                <span>Edit Data</span>
+                            `;
+                        }
+                    } else {
+                        container.innerHTML = `
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
+                                <span class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-pulse"></span>
+                                <span id="badge_text_${item.id}">Belum Diukur</span>
+                            </span>
+                        `;
+                        card.setAttribute('data-sudah', '0');
+                        card.classList.remove('border-emerald-500/30');
+                        card.classList.add('border-slate-200', 'dark:border-slate-800');
+
+                        const actionBtn = card.querySelector('button[onclick^="openInputModal"]');
+                        if (actionBtn) {
+                            const cardNama = card.getAttribute('data-nama') || '';
+                            const escapedNama = cardNama.replace(/'/g, "\\'");
+                            actionBtn.setAttribute('onclick', `openInputModal(${item.id}, '${escapedNama}', '', '', 0, false)`);
+                            actionBtn.innerHTML = `
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span>Input Data</span>
+                            `;
+                        }
                     }
                 });
 
