@@ -253,24 +253,28 @@
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
                 <!-- Session Flash Messages -->
                 @if(session('success'))
-                    <div class="p-4 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-800 dark:text-emerald-200 text-sm flex items-center justify-between gap-3 shadow-lg">
+                    <div class="alert-auto-dismiss p-4 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-800 dark:text-emerald-200 text-sm flex items-center justify-between gap-3 shadow-lg transition-all duration-300">
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             <span>{{ session('success') }}</span>
                         </div>
+                        <button type="button" onclick="dismissAlert(this.closest('.alert-auto-dismiss'))" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-white p-1 text-xs font-bold shrink-0">✕</button>
                     </div>
                 @endif
 
                 @if($errors->any())
-                    <div class="p-4 bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-800 dark:text-rose-200 text-sm">
-                        <div class="font-bold mb-1">Periksa kembali data inputan:</div>
-                        <ul class="list-disc list-inside space-y-0.5 text-xs">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div class="alert-auto-dismiss p-4 bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-800 dark:text-rose-200 text-sm flex items-start justify-between gap-3 shadow-lg transition-all duration-300">
+                        <div>
+                            <div class="font-bold mb-1">Periksa kembali data inputan:</div>
+                            <ul class="list-disc list-inside space-y-0.5 text-xs">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <button type="button" onclick="dismissAlert(this.closest('.alert-auto-dismiss'))" class="text-rose-600 dark:text-rose-400 hover:text-rose-900 dark:hover:text-white p-1 text-xs font-bold shrink-0">✕</button>
                     </div>
                 @endif
 
@@ -334,6 +338,26 @@
             document.body.removeChild(el);
         }
     };
+
+    window.dismissAlert = function(el) {
+        if (!el) return;
+        el.style.transition = 'all 300ms ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-6px)';
+        setTimeout(() => {
+            if (el && el.parentNode) {
+                el.classList.add('hidden');
+            }
+        }, 300);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.alert-auto-dismiss').forEach(el => {
+            setTimeout(() => {
+                window.dismissAlert(el);
+            }, 4000);
+        });
+    });
     </script>
 </body>
 </html>
