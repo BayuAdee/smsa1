@@ -186,4 +186,52 @@ class PeriodPengukuranSawTest extends TestCase
         $this->assertEquals(82.0, $p2->tinggi_cm);
         $this->assertEquals(10.5, $p2->berat_kg);
     }
+
+    public function test_delete_measurement_resets_data_and_saw()
+    {
+        $kader = User::where('role', 'kader')->first();
+        $anak = Anak::where('posyandu_id', $kader->posyandu_id)->first();
+
+        $this->actingAs($kader);
+
+        // 1. Simpan data pengukuran
+        $this->postJson(route('pengukuran.store'), [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 9,
+            'tahun_ukur' => 2026,
+            'tinggi_cm' => 80.0,
+            'berat_kg' => 10.0,
+        ])->assertStatus(200);
+
+        $this->assertDatabaseHas('pengukurans', [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 9,
+            'tahun_ukur' => 2026,
+        ]);
+
+        // 2. Hapus / Reset data pengukuran
+        $response = $this->deleteJson(route('pengukuran.destroy'), [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 9,
+            'tahun_ukur' => 2026,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'anak_id' => $anak->id,
+            ]);
+
+        $this->assertDatabaseMissing('pengukurans', [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 9,
+            'tahun_ukur' => 2026,
+        ]);
+
+        $this->assertDatabaseMissing('hasil_saws', [
+            'anak_id' => $anak->id,
+            'bulan_ukur' => 9,
+            'tahun_ukur' => 2026,
+        ]);
+    }
 }

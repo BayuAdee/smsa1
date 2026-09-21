@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengukuran', [PengukuranController::class, 'index'])->name('pengukuran.index');
     Route::get('/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
     Route::post('/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
+    Route::delete('/pengukuran', [PengukuranController::class, 'destroy'])->name('pengukuran.destroy');
 
     // Ranking Prioritas Stunting (Tabel SAW)
     Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
