@@ -46,13 +46,19 @@
             <div>
                 <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Username Login <span class="text-rose-600 dark:text-rose-400">*</span></label>
                 <input type="text" id="username" name="username" value="{{ old('username', $kader->username) }}" required
-                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 font-mono transition-all outline-none">
+                       class="w-full bg-slate-50 dark:bg-slate-950 border @error('username') border-rose-500 @else border-slate-300 dark:border-slate-700 @enderror text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 font-mono transition-all outline-none">
+                @error('username')
+                    <p class="text-xs text-rose-500 dark:text-rose-400 font-bold mt-1.5">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Alamat Email <span class="text-slate-400 dark:text-slate-500">(Opsional)</span></label>
                 <input type="email" id="email" name="email" value="{{ old('email', $kader->email) }}"
-                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition-all outline-none">
+                       class="w-full bg-slate-50 dark:bg-slate-950 border @error('email') border-rose-500 @else border-slate-300 dark:border-slate-700 @enderror text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl p-3.5 text-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition-all outline-none">
+                @error('email')
+                    <p class="text-xs text-rose-500 dark:text-rose-400 font-bold mt-1.5">{{ $message }}</p>
+                @enderror
             </div>
         </div>
 
