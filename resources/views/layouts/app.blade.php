@@ -62,7 +62,7 @@
              class="fixed inset-0 z-40 bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm lg:hidden"></div>
 
         <!-- Sidebar Container -->
-        <aside class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/80 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:translate-x-0"
+        <aside class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/80 flex flex-col justify-between -translate-x-full transform transition-transform duration-300 ease-in-out lg:translate-x-0"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
             <!-- Sidebar Header Brand -->
@@ -251,21 +251,9 @@
 
             <!-- Scrollable Content Body -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
-                <!-- Session Flash Messages -->
-                @if(session('success'))
-                    <div class="alert-auto-dismiss p-4 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-800 dark:text-emerald-200 text-sm flex items-center justify-between gap-3 shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>{{ session('success') }}</span>
-                        </div>
-                        <button type="button" onclick="dismissAlert(this.closest('.alert-auto-dismiss'))" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-white p-1 text-xs font-bold shrink-0">✕</button>
-                    </div>
-                @endif
-
+                <!-- Inline Form Validation Errors ($errors) -->
                 @if($errors->any())
-                    <div class="alert-auto-dismiss p-4 bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-800 dark:text-rose-200 text-sm flex items-start justify-between gap-3 shadow-lg transition-all duration-300">
+                    <div class="alert-auto-dismiss p-4 bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-800 dark:text-rose-200 text-sm flex items-start justify-between gap-3 shadow-lg transition-all duration-300 mb-6">
                         <div>
                             <div class="font-bold mb-1">Periksa kembali data inputan:</div>
                             <ul class="list-disc list-inside space-y-0.5 text-xs">
@@ -281,6 +269,60 @@
                 @yield('content')
             </main>
         </div>
+    </div>
+
+    <!-- Floating Toast Notification Overlay (CRUD Actions) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3 max-w-md w-full pointer-events-none px-4 sm:px-0">
+        @if(session('success'))
+            <div class="toast-item pointer-events-auto p-4 bg-white/95 dark:bg-slate-900/95 border border-emerald-500/30 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transition-all duration-300 transform translate-x-0 opacity-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Berhasil</div>
+                        <div class="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{{ session('success') }}</div>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissToast(this.closest('.toast-item'))" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-xs font-bold shrink-0 rounded-lg">✕</button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="toast-item pointer-events-auto p-4 bg-white/95 dark:bg-slate-900/95 border border-rose-500/30 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transition-all duration-300 transform translate-x-0 opacity-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-[10px] text-rose-600 dark:text-rose-400 uppercase tracking-wider">Perhatian</div>
+                        <div class="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{{ session('error') }}</div>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissToast(this.closest('.toast-item'))" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-xs font-bold shrink-0 rounded-lg">✕</button>
+            </div>
+        @endif
+
+        @if(session('info'))
+            <div class="toast-item pointer-events-auto p-4 bg-white/95 dark:bg-slate-900/95 border border-sky-500/30 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transition-all duration-300 transform translate-x-0 opacity-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-[10px] text-sky-600 dark:text-sky-400 uppercase tracking-wider">Informasi</div>
+                        <div class="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{{ session('info') }}</div>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissToast(this.closest('.toast-item'))" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-xs font-bold shrink-0 rounded-lg">✕</button>
+            </div>
+        @endif
     </div>
 
     <script>
@@ -351,11 +393,29 @@
         }, 300);
     };
 
+    window.dismissToast = function(el) {
+        if (!el) return;
+        el.style.transition = 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(24px)';
+        setTimeout(() => {
+            if (el && el.parentNode) {
+                el.remove();
+            }
+        }, 300);
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.alert-auto-dismiss').forEach(el => {
             setTimeout(() => {
                 window.dismissAlert(el);
             }, 4000);
+        });
+
+        document.querySelectorAll('.toast-item').forEach(el => {
+            setTimeout(() => {
+                window.dismissToast(el);
+            }, 4200);
         });
     });
     </script>

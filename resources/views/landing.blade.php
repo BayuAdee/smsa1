@@ -163,9 +163,9 @@
                             <a href="{{ route('ortu.show', ['token' => 'BALITA-00D75670-ADB5-463A-8D6C-456480E5FCDE']) }}" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 hover:text-emerald-600 dark:hover:text-emerald-300 hover:border-emerald-500/30 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 font-mono transition-all">
                                 BALITA-Budi-01
                             </a>
-                            <a href="{{ route('ortu.show', ['token' => 'BALITA-139224C4-E6DC-4D84-ACD7-96AE7D45A5D4']) }}" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 hover:text-emerald-600 dark:hover:text-emerald-300 hover:border-emerald-500/30 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 font-mono transition-all">
+                            <!-- <a href="{{ route('ortu.show', ['token' => 'BALITA-139224C4-E6DC-4D84-ACD7-96AE7D45A5D4']) }}" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 hover:text-emerald-600 dark:hover:text-emerald-300 hover:border-emerald-500/30 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 font-mono transition-all">
                                 BALITA-Cici-02
-                            </a>
+                            </a> -->
                             <a href="{{ route('ortu.show', ['token' => 'BALITA-13961497-7995-409F-9460-FA59E683C071']) }}" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 hover:text-emerald-600 dark:hover:text-emerald-300 hover:border-emerald-500/30 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 font-mono transition-all">
                                 BALITA-Eka-03
                             </a>
