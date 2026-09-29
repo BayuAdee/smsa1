@@ -129,11 +129,11 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                                         </a>
                                         @if($anak->is_siap_lulus)
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30" title="Balita sudah berusia 5 tahun atau lebih, siap lulus Posyandu">
-                                                🎓 Siap Lulus (5+ Thn)
+                                                Siap Lulus (5+ Thn)
                                             </span>
                                         @elseif(! $anak->status_aktif)
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30">
-                                                🎓 Diarsip / Lulus
+                                                Diarsip / Lulus
                                             </span>
                                         @endif
                                     </div>
@@ -214,11 +214,11 @@ class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 
                                     </a>
                                     @if($anak->is_siap_lulus)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                                            🎓 Siap Lulus (5+ Thn)
+                                            Siap Lulus (5+ Thn)
                                         </span>
                                     @elseif(! $anak->status_aktif)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30">
-                                            🎓 Diarsip / Lulus
+                                            Diarsip / Lulus
                                         </span>
                                     @endif
                                 </div>
