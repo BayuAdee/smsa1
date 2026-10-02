@@ -45,11 +45,11 @@ class ForgotPasswordController extends Controller
             $plainToken = bin2hex(random_bytes(32));
             $tokenHash = hash('sha256', $plainToken);
 
-            // Simpan hash token dengan masa aktif 30 menit
+            // Simpan hash token dengan masa aktif 15 menit
             PasswordReset::create([
                 'user_id' => $user->id,
                 'token_hash' => $tokenHash,
-                'expires_at' => now()->addMinutes(30),
+                'expires_at' => now()->addMinutes(15),
                 'created_at' => now(),
             ]);
 

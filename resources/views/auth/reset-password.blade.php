@@ -93,7 +93,7 @@
                     </div>
                     <h1 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Tautan Tidak Valid</h1>
                     <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                        {{ $error ?? 'Link reset password sudah kedaluwarsa (lebih dari 30 menit) atau telah digunakan sebelumnya.' }}
+                        {{ $error ?? 'Link reset password sudah kedaluwarsa atau telah digunakan sebelumnya.' }}
                     </p>
 
                     <a href="{{ route('password.request') }}" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-2xl shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all duration-200 inline-flex items-center justify-center gap-2">

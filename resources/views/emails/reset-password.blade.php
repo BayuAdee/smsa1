@@ -115,7 +115,7 @@
             </div>
 
             <div class="info-box">
-                <strong>Perhatian:</strong> Link reset password ini hanya berlaku selama <strong>30 menit</strong> dan hanya dapat digunakan satu kali.
+                <strong>Perhatian:</strong> Link reset password ini hanya berlaku selama <strong>15 menit</strong> dan hanya dapat digunakan satu kali.
             </div>
 
             <p class="note">Abaikan email ini jika Anda tidak meminta reset password. Akun Anda tetap aman dan tidak ada perubahan yang dibuat.</p>
