@@ -129,9 +129,11 @@
         <h1>SISTEM MONITORING STUNTING & SPK SAW POSYANDU</h1>
         <h2>
             @if($jenisData === 'profil_balita')
-                LAPORAN PROFIL DATA BALITA (ANAK)
+                LAPORAN PROFIL DATA BALITA
             @elseif($jenisData === 'pengukuran_bulanan')
                 LAPORAN CATATAN PENGUKURAN BULANAN BALITA
+            @elseif($jenisData === 'anak_stunting')
+                LAPORAN DATA ANAK STUNTING
             @else
                 LAPORAN HASIL PERANGKINGAN PRIORITAS STUNTING METODE SAW
             @endif
@@ -226,6 +228,65 @@
             @empty
             <tr>
                 <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">Tidak ada data pengukuran di periode ini.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    @elseif($jenisData === 'anak_stunting')
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30px; text-align: center;">No</th>
+                <th>Posyandu</th>
+                <th>Nama Balita</th>
+                <th>NIK</th>
+                <th>Usia</th>
+                <th>TB / BB</th>
+                <th>Z-Score TB/U (C1)</th>
+                <th>Status Stunting</th>
+                <th>Nilai V (SAW)</th>
+                <th>Kategori Risiko</th>
+                <th>Nama Orang Tua</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($data as $i => $row)
+            <tr>
+                <td style="text-align: center; font-weight: bold;">{{ $i + 1 }}</td>
+                <td>{{ $row->posyandu->nama ?? $row->anak->posyandu->nama ?? '-' }}</td>
+                <td><strong>{{ $row->anak->nama ?? '-' }}</strong></td>
+                <td style="font-family: monospace;">{{ $row->anak->nik ?? '-' }}</td>
+                <td>{{ $row->pengukuran->usia_bulan ?? '-' }} bln</td>
+                <td>{{ $row->pengukuran->tinggi_cm ?? '-' }}cm / {{ $row->pengukuran->berat_kg ?? '-' }}kg</td>
+                <td style="font-weight: bold; color: #b91c1c;">{{ number_format($row->z_tbu, 2) }} SD</td>
+                <td>
+                    @if($row->z_tbu < -3.0)
+                        <span class="badge badge-tinggi">Sangat Pendek</span>
+                    @else
+                        <span class="badge badge-sedang">Pendek (Stunted)</span>
+                    @endif
+                </td>
+                <td style="font-weight: bold; color: #047857;">{{ number_format($row->nilai_v, 4) }}</td>
+                <td>
+                    @php
+                        $katPdf = strtolower($row->kategori_risiko);
+                    @endphp
+                    @if(in_array($katPdf, ['tinggi', 'sangat tinggi', 'sangat_tinggi']))
+                        <span class="badge badge-tinggi">RISIKO TINGGI</span>
+                    @elseif($katPdf === 'sedang')
+                        <span class="badge badge-sedang">RISIKO SEDANG</span>
+                    @else
+                        <span class="badge badge-rendah">RISIKO RENDAH</span>
+                    @endif
+                </td>
+                <td>{{ $row->anak->nama_orang_tua ?? '-' }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="11" style="text-align: center; color: #16a34a; font-weight: bold; padding: 20px;">
+                    Tidak ditemukan balita terindikasi stunting pada periode ini.
+                </td>
             </tr>
             @endforelse
         </tbody>

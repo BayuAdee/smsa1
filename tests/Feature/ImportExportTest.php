@@ -270,4 +270,101 @@ class ImportExportTest extends TestCase
         $downloadResponse->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
         $downloadResponse->assertHeader('Content-Disposition', 'attachment; filename="baris_gagal_import.csv"');
     }
+
+    public function test_export_anak_stunting_filters_only_children_with_z_tbu_below_minus_two(): void
+    {
+        $anakStunting = Anak::create([
+            'posyandu_id' => $this->posyanduA->id,
+            'nama' => 'Balita Stunting',
+            'nik' => '3201019999990001',
+            'tanggal_lahir' => '2024-01-01',
+            'jenis_kelamin' => 'L',
+            'berat_lahir_gram' => 3000,
+            'status_bblr' => 'tidak',
+            'nama_orang_tua' => 'Ortu Stunting',
+            'token_akses' => Anak::generateTokenAkses(),
+            'status_aktif' => true,
+        ]);
+
+        $anakNormal = Anak::create([
+            'posyandu_id' => $this->posyanduA->id,
+            'nama' => 'Balita Normal',
+            'nik' => '3201019999990002',
+            'tanggal_lahir' => '2024-01-01',
+            'jenis_kelamin' => 'L',
+            'berat_lahir_gram' => 3200,
+            'status_bblr' => 'tidak',
+            'nama_orang_tua' => 'Ortu Normal',
+            'token_akses' => Anak::generateTokenAkses(),
+            'status_aktif' => true,
+        ]);
+
+        \App\Models\HasilSaw::create([
+            'anak_id' => $anakStunting->id,
+            'posyandu_id' => $this->posyanduA->id,
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'z_tbu' => -2.85,
+            'z_bbu' => -1.50,
+            'raw_c1' => 2.85,
+            'raw_c2' => 1.0,
+            'raw_c3' => 1.0,
+            'raw_c4' => 1.0,
+            'r_c1' => 0.35,
+            'r_c2' => 1.0,
+            'r_c3' => 1.0,
+            'r_c4' => 1.0,
+            'nilai_v' => 0.55,
+            'kategori_risiko' => 'Tinggi',
+            'is_c2_estimasi' => false,
+            'dihitung_pada' => now(),
+        ]);
+
+        \App\Models\HasilSaw::create([
+            'anak_id' => $anakNormal->id,
+            'posyandu_id' => $this->posyanduA->id,
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'z_tbu' => -0.50,
+            'z_bbu' => -0.20,
+            'raw_c1' => 1.0,
+            'raw_c2' => 1.0,
+            'raw_c3' => 1.0,
+            'raw_c4' => 1.0,
+            'r_c1' => 1.0,
+            'r_c2' => 1.0,
+            'r_c3' => 1.0,
+            'r_c4' => 1.0,
+            'nilai_v' => 1.0,
+            'kategori_risiko' => 'Rendah',
+            'is_c2_estimasi' => false,
+            'dihitung_pada' => now(),
+        ]);
+
+        // 1. Test CSV/Excel Export
+        $responseCsv = $this->actingAs($this->bidan)->get(route('import-export.export', [
+            'bulan' => 10,
+            'tahun' => 2026,
+            'jenis_data' => 'anak_stunting',
+            'format' => 'excel',
+            'posyandu_id' => 'all',
+        ]));
+
+        $responseCsv->assertStatus(200);
+        $responseCsv->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+        // 2. Test PDF Export
+        $responsePdf = $this->actingAs($this->bidan)->get(route('import-export.export', [
+            'bulan' => 10,
+            'tahun' => 2026,
+            'jenis_data' => 'anak_stunting',
+            'format' => 'pdf',
+            'posyandu_id' => 'all',
+        ]));
+
+        $responsePdf->assertStatus(200);
+        $responsePdf->assertSee('LAPORAN DATA ANAK STUNTING');
+        $responsePdf->assertSee('Balita Stunting');
+        $responsePdf->assertDontSee('Balita Normal');
+    }
 }
