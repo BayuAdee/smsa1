@@ -3,12 +3,14 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BalitaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\KaderController;
 use App\Http\Controllers\OrtuController;
 use App\Http\Controllers\PengukuranController;
 use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +30,12 @@ Route::get('/ortu/{token}', [OrtuController::class, 'show'])->name('ortu.show');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Lupa Password (Khusus Bidan Desa)
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:5,60')->name('password.email');
+Route::get('/reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->middleware('throttle:10,60')->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -84,4 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import-export/preview', [ImportExportController::class, 'previewImport'])->name('import-export.preview');
     Route::post('/import-export/execute', [ImportExportController::class, 'executeImport'])->name('import-export.execute');
     Route::get('/import-export/export', [ImportExportController::class, 'export'])->name('import-export.export');
-});
+}
+
+
+);

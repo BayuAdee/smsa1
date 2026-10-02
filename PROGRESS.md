@@ -131,10 +131,11 @@
   - Menjalankan migrasi incremental tanpa `migrate:fresh` atau menghapus data.
   - Query otomatis mengonversi data lama berkategori `'Sangat Tinggi'` menjadi `'Tinggi'`. Seluruh data Posyandu, Kader, Balita, dan Pengukuran tetap utuh 100%.
 - **Logika Klasifikasi & Recalculate (`SawCalculatorService.php` & `RecalculateSaw`)**:
-  - Penyederhanaan klasifikasi SPK SAW menjadi 3 level:
-    * `'Tinggi'` ($V_i < 0.78$): Prioritas utama penanganan stunting.
-    * `'Sedang'` ($0.78 \le V_i < 0.93$): Butuh pemantauan gizi & faltering.
-    * `'Rendah'` ($V_i \ge 0.93$): Tumbuh kembang optimal / indikator sehat.
+  - Penyederhanaan klasifikasi SPK SAW menjadi 3 level (sesuai implementasi `SawCalculatorService.php`):
+    * `'Tinggi'` ($V_i < 0.6374$): Prioritas utama penanganan stunting.
+    * `'Sedang'` ($0.6374 \le V_i < 0.7857$): Butuh pemantauan gizi & faltering.
+    * `'Rendah'` ($V_i \ge 0.7857$): Tumbuh kembang optimal / indikator sehat.
+  - **Dasar Penetapan Threshold (Criterion-Anchored)**: Nilai V teoritis berada pada rentang $[0.25, 1.00]$. Titik potong ditetapkan secara empiris dengan mengurutkan nilai $V_i$ seluruh balita lalu mengaitkannya pada kriteria dominan **C1 (TB/U, bobot 45%)** yang merupakan definisi klinis stunting (WHO: TB/U < -2 SD). Validasi pada data penelitian (1.291 record): zona `Tinggi` memuat 94% balita TB/U < -2 SD (rata-rata Z = -2.43), zona `Sedang` 48% (rata-rata Z = -1.39), dan zona `Rendah` 0% (rata-rata Z = -0.57).
   - Pembuatan Artisan Command `php artisan saw:recalculate` untuk menghitung ulang secara otomatis seluruh record `hasil_saw` di database.
 - **Visual UI Badge & Dropdown Filter**:
   - Tampilan warna badge terstandarisasi: Merah (`Tinggi`), Kuning/Amber (`Sedang`), Hijau Emerald (`Rendah`).
