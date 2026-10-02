@@ -80,10 +80,12 @@ class ForgotPasswordController extends Controller
         $domain = $parts[1];
         $len = strlen($name);
 
-        if ($len <= 2) {
+        if ($len <= 5) {
+            // Jika panjang nama email 5 huruf atau kurang (terlalu pendek)
             $maskedName = substr($name, 0, 1).'***';
         } else {
-            $maskedName = substr($name, 0, 1).'***'.substr($name, -1);
+            // 3 huruf depan dan 2 huruf belakang kelihatan
+            $maskedName = substr($name, 0, 3).'***'.substr($name, -2);
         }
 
         return $maskedName.'@'.$domain;
