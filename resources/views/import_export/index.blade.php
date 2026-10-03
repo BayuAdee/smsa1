@@ -306,6 +306,7 @@
                             <option value="profil_balita">Data Profil Balita (Anak)</option>
                             <option value="pengukuran_bulanan">Data Catatan Pengukuran Bulanan</option>
                             <option value="ranking_saw">Data Hasil Ranking Prioritas SAW</option>
+                            <option value="anak_stunting">Data Anak Stunting</option>
                         </select>
                     </div>
 

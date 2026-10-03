@@ -438,7 +438,7 @@ class ImportExportController extends Controller
         $request->validate([
             'bulan' => 'required|integer|between:1,12',
             'tahun' => 'required|integer|min:2020|max:2030',
-            'jenis_data' => 'required|in:profil_balita,pengukuran_bulanan,ranking_saw',
+            'jenis_data' => 'required|in:profil_balita,pengukuran_bulanan,ranking_saw,anak_stunting',
             'format' => 'required|in:excel,pdf',
         ]);
 
@@ -481,6 +481,18 @@ class ImportExportController extends Controller
                 });
             }
             $data = $query->get()->sortBy(fn ($p) => $p->anak->nama ?? '');
+        } elseif ($jenisData === 'anak_stunting') {
+            // Anak stunting: yang memiliki nilai C1 jelek / merah (Z-Score TB/U < -2.0 SD)
+            $query = HasilSaw::withoutPosyanduScope()
+                ->with(['anak.posyandu', 'pengukuran'])
+                ->where('bulan_ukur', $bulan)
+                ->where('tahun_ukur', $tahun)
+                ->where('z_tbu', '<', -2.0);
+
+            if ($posyanduId !== 'all') {
+                $query->where('posyandu_id', $posyanduId);
+            }
+            $data = $query->orderBy('z_tbu', 'asc')->get();
         } else { // ranking_saw
             $query = HasilSaw::withoutPosyanduScope()
                 ->with(['anak.posyandu', 'pengukuran'])
@@ -539,7 +551,7 @@ class ImportExportController extends Controller
                 fputcsv($file, ["Periode: {$namaBulan} {$tahun}"]);
                 fputcsv($file, ['Dicetak Pada: '.now()->translatedFormat('d F Y H:i')]);
                 fputcsv($file, []);
-                fputcsv($file, ['No', 'Posyandu', 'Nama Balita', 'NIK', 'Usia Saat Ukur (Bulan)', 'Tanggal Ukur', 'Tinggi Badan (cm)', 'Berat Badan (kg)', 'Petugas Encater']);
+                fputcsv($file, ['No', 'Posyandu', 'Nama Balita', 'NIK', 'Usia Saat Ukur (Bulan)', 'Tanggal Ukur', 'Tinggi Badan (cm)', 'Berat Badan (kg)', 'Petugas Input']);
 
                 foreach ($data as $i => $row) {
                     $nikFormatted = ! empty($row->anak->nik) ? '="'.$row->anak->nik.'"' : '-';
@@ -553,6 +565,33 @@ class ImportExportController extends Controller
                         $row->tinggi_cm,
                         $row->berat_kg,
                         $row->pembuat->name ?? '-',
+                    ]);
+                }
+            } elseif ($jenisData === 'anak_stunting') {
+                fputcsv($file, ["LAPORAN DATA ANAK STUNTING - {$namaPosyandu}"]);
+                fputcsv($file, ["Periode: {$namaBulan} {$tahun}"]);
+                fputcsv($file, ['Dicetak Pada: '.now()->translatedFormat('d F Y H:i')]);
+                fputcsv($file, []);
+                fputcsv($file, ['No', 'Posyandu', 'Nama Balita', 'NIK', 'Usia (Bulan)', 'Jenis Kelamin', 'TB (cm)', 'BB (kg)', 'Z-Score TB/U (C1)', 'Status Stunting', 'Z-Score BB/U (C3)', 'Skor Preferensi (V)', 'Kategori Risiko', 'Nama Orang Tua']);
+
+                foreach ($data as $i => $row) {
+                    $nikFormatted = ! empty($row->anak->nik) ? '="'.$row->anak->nik.'"' : '-';
+                    $statusStunting = ($row->z_tbu < -3.0) ? 'Sangat Pendek (Severely Stunted)' : 'Pendek (Stunted)';
+                    fputcsv($file, [
+                        $i + 1,
+                        $row->posyandu->nama ?? $row->anak->posyandu->nama ?? '-',
+                        $row->anak->nama ?? '-',
+                        $nikFormatted,
+                        $row->pengukuran->usia_bulan ?? '-',
+                        ($row->anak->jenis_kelamin ?? '') === 'L' ? 'Laki-laki' : 'Perempuan',
+                        $row->pengukuran->tinggi_cm ?? '-',
+                        $row->pengukuran->berat_kg ?? '-',
+                        number_format($row->z_tbu, 2).' SD',
+                        $statusStunting,
+                        number_format($row->z_bbu, 2).' SD',
+                        number_format($row->nilai_v, 4),
+                        strtoupper($row->kategori_risiko),
+                        $row->anak->nama_orang_tua ?? '-',
                     ]);
                 }
             } else { // ranking_saw
