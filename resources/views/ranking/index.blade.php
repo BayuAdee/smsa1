@@ -13,7 +13,16 @@
             {{-- <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Month/Year SAW Engine</span> --}}
             <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">Ranking Prioritas Penanganan Stunting</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                SPK SAW COST dihitung per periode bulan: <strong class="text-emerald-600 dark:text-emerald-400">C1: TB/U Z-Score (45%)</strong>, <strong class="text-teal-600 dark:text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-600 dark:text-cyan-400">C3: BB/U Z-Score (20%)</strong>, dan <strong class="text-amber-600 dark:text-amber-400">C4: Riwayat BBLR (10%)</strong>.
+                SPK SAW dihitung per periode bulan:
+                @if(isset($criterias) && $criterias->isNotEmpty())
+                    @foreach($criterias as $c)
+                        <span class="inline-block mr-1.5 font-bold text-slate-700 dark:text-slate-300">
+                            <strong class="text-emerald-600 dark:text-emerald-400">{{ $c->kode }}:</strong> {{ $c->nama }} ({{ $c->bobot_persen }}%)
+                        </span>
+                    @endforeach
+                @else
+                    <strong class="text-emerald-600 dark:text-emerald-400">C1: TB/U Z-Score (45%)</strong>, <strong class="text-teal-600 dark:text-teal-400">C2: Growth Faltering (25%)</strong>, <strong class="text-cyan-600 dark:text-cyan-400">C3: BB/U Z-Score (20%)</strong>, dan <strong class="text-amber-600 dark:text-amber-400">C4: Riwayat BBLR (10%)</strong>.
+                @endif
             </p>
         </div>
 
@@ -71,6 +80,16 @@
                     <span>Hitung Ulang SPK</span>
                 </button>
             </form>
+
+            <!-- @if(Auth::user()->isBidan())
+            <a href="{{ route('settings.spk.index') }}" class="w-full sm:w-auto py-2.5 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all min-h-[44px] shadow-sm">
+                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Atur Parameter</span>
+            </a>
+            @endif -->
         </div>
     </div>
 

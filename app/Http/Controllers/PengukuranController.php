@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Anak;
 use App\Models\HasilSaw;
 use App\Models\Pengukuran;
+use App\Models\SpkCriteria;
 use App\Services\SawCalculatorService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -54,24 +55,28 @@ class PengukuranController extends Controller
 
         // Support JSON response for background realtime polling
         if ($request->wantsJson()) {
-            $sudahDiukurCount = $anaks->filter(fn($a) => !is_null($a->pengukuran_periode))->count();
+            $sudahDiukurCount = $anaks->filter(fn ($a) => ! is_null($a->pengukuran_periode))->count();
+
             return response()->json([
                 'success' => true,
                 'totalBalita' => $anaks->count(),
                 'sudahDiukur' => $sudahDiukurCount,
                 'anaks' => $anaks->map(function ($anak) {
                     $p = $anak->pengukuran_periode;
+
                     return [
                         'id' => $anak->id,
-                        'sudah' => !is_null($p),
+                        'sudah' => ! is_null($p),
                         'tinggi_cm' => $p ? $p->tinggi_cm : null,
-                        'berat_kg'  => $p ? $p->berat_kg : null,
+                        'berat_kg' => $p ? $p->berat_kg : null,
                     ];
                 })->values(),
             ]);
         }
 
-        return view('pengukuran.index', compact('anaks', 'selectedBulan', 'selectedTahun', 'periodeOptions'));
+        $customCriterias = SpkCriteria::where('is_active', true)->where('tipe_sumber', 'kustom')->get();
+
+        return view('pengukuran.index', compact('anaks', 'selectedBulan', 'selectedTahun', 'periodeOptions', 'customCriterias'));
     }
 
     public function create(Request $request)
@@ -83,7 +88,7 @@ class PengukuranController extends Controller
     {
         // Sanitisasi input desimal: ubah koma (,) menjadi titik (.) dan hilangkan string kosong
         $tinggi = $request->input('tinggi_cm');
-        $berat  = $request->input('berat_kg');
+        $berat = $request->input('berat_kg');
 
         if (is_numeric($tinggi) || (is_string($tinggi) && trim($tinggi) !== '')) {
             $tinggi = str_replace(',', '.', trim((string) $tinggi));
@@ -99,7 +104,7 @@ class PengukuranController extends Controller
 
         $request->merge([
             'tinggi_cm' => $tinggi,
-            'berat_kg'  => $berat,
+            'berat_kg' => $berat,
         ]);
 
         $validated = $request->validate([
@@ -108,9 +113,10 @@ class PengukuranController extends Controller
             'tahun_ukur' => 'required|integer|min:2000|max:2099',
             'tinggi_cm' => 'nullable|numeric|min:30|max:150|required_without:berat_kg',
             'berat_kg' => 'nullable|numeric|min:1|max:40|required_without:tinggi_cm',
+            'nilai_kustom' => 'nullable|array',
         ], [
             'tinggi_cm.required_without' => 'Isi minimal salah satu antara Tinggi Badan atau Berat Badan.',
-            'berat_kg.required_without'  => 'Isi minimal salah satu antara Tinggi Badan atau Berat Badan.',
+            'berat_kg.required_without' => 'Isi minimal salah satu antara Tinggi Badan atau Berat Badan.',
         ]);
 
         $anak = Anak::findOrFail($validated['anak_id']);
@@ -135,13 +141,18 @@ class PengukuranController extends Controller
             ->where('tahun_ukur', $tahunUkur)
             ->first();
 
-        $tinggiSimpan = (array_key_exists('tinggi_cm', $validated) && !is_null($validated['tinggi_cm']))
+        $tinggiSimpan = (array_key_exists('tinggi_cm', $validated) && ! is_null($validated['tinggi_cm']))
             ? $validated['tinggi_cm']
             : ($existing ? $existing->tinggi_cm : null);
 
-        $beratSimpan = (array_key_exists('berat_kg', $validated) && !is_null($validated['berat_kg']))
+        $beratSimpan = (array_key_exists('berat_kg', $validated) && ! is_null($validated['berat_kg']))
             ? $validated['berat_kg']
             : ($existing ? $existing->berat_kg : null);
+
+        $nilaiKustom = $request->input('nilai_kustom');
+        if (! is_array($nilaiKustom)) {
+            $nilaiKustom = $existing ? $existing->nilai_kustom : null;
+        }
 
         // Timpa Data (UPSERT) per balita & periode
         $pengukuran = Pengukuran::updateOrCreate(
@@ -154,7 +165,8 @@ class PengukuranController extends Controller
                 'tanggal_ukur' => $tanggalUkur,
                 'usia_bulan' => $usiaBulan,
                 'tinggi_cm' => $tinggiSimpan,
-                'berat_kg'  => $beratSimpan,
+                'berat_kg' => $beratSimpan,
+                'nilai_kustom' => $nilaiKustom,
                 'dibuat_oleh' => Auth::id(),
             ]
         );
@@ -170,7 +182,8 @@ class PengukuranController extends Controller
                     'id' => $pengukuran->id,
                     'anak_id' => $pengukuran->anak_id,
                     'tinggi_cm' => $pengukuran->tinggi_cm !== null ? (float) $pengukuran->tinggi_cm : null,
-                    'berat_kg'  => $pengukuran->berat_kg  !== null ? (float) $pengukuran->berat_kg  : null,
+                    'berat_kg' => $pengukuran->berat_kg !== null ? (float) $pengukuran->berat_kg : null,
+                    'nilai_kustom' => $pengukuran->nilai_kustom,
                     'usia_bulan' => $pengukuran->usia_bulan,
                     'bulan_ukur' => $pengukuran->bulan_ukur,
                     'tahun_ukur' => $pengukuran->tahun_ukur,

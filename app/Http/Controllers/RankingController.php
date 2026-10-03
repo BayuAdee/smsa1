@@ -52,7 +52,9 @@ class RankingController extends Controller
             $current->addMonth();
         }
 
-        return view('ranking.index', compact('rankings', 'selectedBulan', 'selectedTahun', 'selectedKategori', 'periodeOptions'));
+        $criterias = $this->sawCalculatorService->getActiveCriterias();
+
+        return view('ranking.index', compact('rankings', 'selectedBulan', 'selectedTahun', 'selectedKategori', 'periodeOptions', 'criterias'));
     }
 
     public function recalculate(Request $request)

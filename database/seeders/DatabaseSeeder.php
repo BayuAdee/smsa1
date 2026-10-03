@@ -242,7 +242,10 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 6. Trigger SPK SAW Calculation for seeded measurements
+        // 6. Seed SPK Criteria & Settings
+        $this->call(SpkSettingSeeder::class);
+
+        // 7. Trigger SPK SAW Calculation for seeded measurements
         $sawCalc = app(SawCalculatorService::class);
         $sawCalc->calculateForPosyandu($posyandu1->id);
         $sawCalc->calculateForPosyandu($posyandu2->id);

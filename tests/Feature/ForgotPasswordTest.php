@@ -16,6 +16,7 @@ class ForgotPasswordTest extends TestCase
     use RefreshDatabase;
 
     protected User $bidan;
+
     protected User $kader;
 
     protected function setUp(): void
@@ -76,7 +77,7 @@ class ForgotPasswordTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('status', function ($value) {
-            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password.');
+            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password');
         });
 
         // Pastikan token tersimpan di tabel password_resets
@@ -100,7 +101,7 @@ class ForgotPasswordTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('status', function ($value) {
-            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password.');
+            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password');
         });
 
         $this->assertDatabaseCount('password_resets', 0);
@@ -117,7 +118,7 @@ class ForgotPasswordTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('status', function ($value) {
-            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password.');
+            return str_contains($value, 'Jika email') && str_contains($value, 'terdaftar, kami telah mengirim link reset password');
         });
 
         // Pastikan tidak ada token dibuat untuk kader

@@ -175,7 +175,7 @@
                             </div>
 
                             <button type="button"
-                                onclick="openInputModal({{ $anak->id }}, '{{ addslashes($anak->nama) }}', '{{ $sudah ? $p->tinggi_cm : '' }}', '{{ $sudah ? $p->berat_kg : '' }}', {{ $usiaPeriode }}, {{ $sudah ? 'true' : 'false' }})"
+                                onclick="openInputModal({{ $anak->id }}, '{{ addslashes($anak->nama) }}', '{{ $sudah ? $p->tinggi_cm : '' }}', '{{ $sudah ? $p->berat_kg : '' }}', {{ $usiaPeriode }}, {{ $sudah ? 'true' : 'false' }}, {{ $sudah && !empty($p->nilai_kustom) ? json_encode($p->nilai_kustom) : '{}' }})"
                                 class="py-1.5 px-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 min-h-[38px]">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $sudah ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4' }}"/>
@@ -253,6 +253,34 @@
                         <span class="absolute right-4 top-3.5 text-xs font-bold text-slate-400 dark:text-slate-500">kg</span>
                     </div>
                 </div>
+
+                @if(isset($customCriterias) && $customCriterias->isNotEmpty())
+                    <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">Indikator Kustom Tambahan</span>
+                        @foreach($customCriterias as $cc)
+                            <div>
+                                <label for="modal_custom_{{ $cc->kode }}" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
+                                    {{ $cc->nama }} ({{ $cc->kode }})
+                                </label>
+                                @if(!empty($cc->sub_kriteria) && is_array($cc->sub_kriteria))
+                                    <select name="nilai_kustom[{{ $cc->kode }}]" id="modal_custom_{{ $cc->kode }}" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-xs rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner">
+                                        @foreach($cc->sub_kriteria as $sub)
+                                            <option value="{{ $sub['skor'] }}">{{ $sub['label'] }} (Skor: {{ $sub['skor'] }})</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <select name="nilai_kustom[{{ $cc->kode }}]" id="modal_custom_{{ $cc->kode }}" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-xs rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner">
+                                        <option value="1.0">1.0 (Ideal / Aman)</option>
+                                        <option value="2.0">2.0 (Risiko Sedang)</option>
+                                        <option value="3.0">3.0 (Cukup Berisiko)</option>
+                                        <option value="4.0">4.0 (Risiko Tinggi)</option>
+                                    </select>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <p class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">* Bisa diisi salah satu (Tinggi Badan atau Berat Badan).</p>
             </div>
 
@@ -506,12 +534,28 @@ function filterBalitaList() {
     }
 }
 
-function openInputModal(id, nama, tinggi, berat, usiaBulan, isSudah = false) {
+function openInputModal(id, nama, tinggi, berat, usiaBulan, isSudah = false, customJson = '{}') {
     document.getElementById('modal_anak_id').value = id;
     document.getElementById('modal_anak_nama').innerText = nama;
     document.getElementById('modal_tinggi_cm').value = tinggi || '';
     document.getElementById('modal_berat_kg').value = berat || '';
     document.getElementById('modal_error').classList.add('hidden');
+
+    let customObj = {};
+    if (typeof customJson === 'string') {
+        try { customObj = JSON.parse(customJson); } catch (e) { customObj = {}; }
+    } else if (typeof customJson === 'object' && customJson !== null) {
+        customObj = customJson;
+    }
+
+    document.querySelectorAll('[id^="modal_custom_"]').forEach(el => {
+        const kode = el.id.replace('modal_custom_', '');
+        if (customObj && customObj[kode] !== undefined && customObj[kode] !== null) {
+            el.value = customObj[kode];
+        } else if (el.options && el.options.length > 0) {
+            el.selectedIndex = 0;
+        }
+    });
 
     const btnReset = document.getElementById('btn_reset_modal');
     if (btnReset) {
@@ -703,9 +747,8 @@ async function submitModalForm(e) {
                 if (actionBtn) {
                     const anakNama = document.getElementById('modal_anak_nama').innerText;
                     const escapedNama = anakNama.replace(/'/g, "\\'");
-                    const tVal = data.pengukuran.tinggi_cm !== null ? data.pengukuran.tinggi_cm : '';
-                    const bVal = data.pengukuran.berat_kg !== null ? data.pengukuran.berat_kg : '';
-                    actionBtn.setAttribute('onclick', `openInputModal(${anakId}, '${escapedNama}', '${tVal}', '${bVal}', ${data.pengukuran.usia_bulan}, true)`);
+                    const kVal = data.pengukuran.nilai_kustom ? JSON.stringify(data.pengukuran.nilai_kustom).replace(/"/g, '&quot;') : '{}';
+                    actionBtn.setAttribute('onclick', `openInputModal(${anakId}, '${escapedNama}', '${tVal}', '${bVal}', ${data.pengukuran.usia_bulan}, true, '${kVal}')`);
                     actionBtn.innerHTML = `
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
