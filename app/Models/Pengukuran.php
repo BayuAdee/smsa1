@@ -21,6 +21,7 @@ class Pengukuran extends Model
         'usia_bulan',
         'tinggi_cm',
         'berat_kg',
+        'nilai_kustom',
         'dibuat_oleh',
     ];
 
@@ -31,6 +32,7 @@ class Pengukuran extends Model
         'usia_bulan' => 'integer',
         'tinggi_cm' => 'float',
         'berat_kg' => 'float',
+        'nilai_kustom' => 'array',
     ];
 
     protected static function booted(): void

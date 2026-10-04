@@ -3,18 +3,16 @@
 namespace App\Services;
 
 use App\Models\ZscoreReference;
-use InvalidArgumentException;
 
 class ZscoreService
 {
     /**
      * Hitung Z-Score WHO LMS untuk TB/U atau BB/U
      *
-     * @param string $indicator 'tbu' atau 'bbu'
-     * @param string $jenisKelamin 'L' atau 'P'
-     * @param int $usiaBulan 0 - 60
-     * @param float $val Nilai aktual tinggi (cm) atau berat (kg)
-     * @return float
+     * @param  string  $indicator  'tbu' atau 'bbu'
+     * @param  string  $jenisKelamin  'L' atau 'P'
+     * @param  int  $usiaBulan  0 - 60
+     * @param  float  $val  Nilai aktual tinggi (cm) atau berat (kg)
      */
     public function calculate(string $indicator, string $jenisKelamin, int $usiaBulan, float $val): float
     {
@@ -25,11 +23,12 @@ class ZscoreService
             ->where('usia_bulan', $usiaBulan)
             ->first();
 
-        if (!$ref) {
+        if (! $ref) {
             // Fallback default calculation if reference not populated
             $m = ($indicator === 'tbu') ? 50 + $usiaBulan * 0.75 : 3.5 + $usiaBulan * 0.25;
             $s = ($indicator === 'tbu') ? 0.038 : 0.12;
             $l = 1.0;
+
             return round((pow($val / $m, $l) - 1) / ($l * $s), 2);
         }
 

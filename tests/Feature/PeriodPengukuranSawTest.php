@@ -113,6 +113,17 @@ class PeriodPengukuranSawTest extends TestCase
     {
         $sawService = app(SawCalculatorService::class);
         $posyandu = Posyandu::first();
+        $anak = Anak::where('posyandu_id', $posyandu->id)->first();
+
+        Pengukuran::create([
+            'anak_id' => $anak->id,
+            'tanggal_ukur' => '2026-07-10',
+            'bulan_ukur' => 7,
+            'tahun_ukur' => 2026,
+            'usia_bulan' => 15,
+            'tinggi_cm' => 74.0,
+            'berat_kg' => 8.5,
+        ]);
 
         // Hitung SAW untuk periode Juli 2026 (Bulan 7, 2026)
         $resultsJuli = $sawService->hitungUntukPosyanduPeriode($posyandu->id, 7, 2026);
@@ -157,32 +168,32 @@ class PeriodPengukuranSawTest extends TestCase
 
         $this->actingAs($kader);
 
-        // 1. Kader A di Stasiun Timbang: hanya isi Berat Badan (10.5 kg)
+        // 1. Kader A di Stasiun Timbang: hanya isi Berat Badan (10.5 kg) pada periode kosong (bulan 12)
         $response1 = $this->postJson(route('pengukuran.store'), [
             'anak_id' => $anak->id,
-            'bulan_ukur' => 10,
+            'bulan_ukur' => 12,
             'tahun_ukur' => 2026,
             'tinggi_cm' => '',
             'berat_kg' => '10.5',
         ]);
         $response1->assertStatus(200);
 
-        $p1 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 10)->where('tahun_ukur', 2026)->first();
+        $p1 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 12)->where('tahun_ukur', 2026)->first();
         $this->assertNull($p1->tinggi_cm);
         $this->assertEquals(10.5, $p1->berat_kg);
 
         // 2. Kader B di Stasiun Tinggi: hanya isi Tinggi Badan (82.0 cm)
         $response2 = $this->postJson(route('pengukuran.store'), [
             'anak_id' => $anak->id,
-            'bulan_ukur' => 10,
+            'bulan_ukur' => 12,
             'tahun_ukur' => 2026,
             'tinggi_cm' => '82.0',
             'berat_kg' => '',
         ]);
         $response2->assertStatus(200);
 
-        // Berat 10.5 kgTIDAK tertimpa null, melainkan TERGABUNG dengan Tinggi 82.0 cm!
-        $p2 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 10)->where('tahun_ukur', 2026)->first();
+        // Berat 10.5 kg TIDAK tertimpa null, melainkan TERGABUNG dengan Tinggi 82.0 cm!
+        $p2 = Pengukuran::where('anak_id', $anak->id)->where('bulan_ukur', 12)->where('tahun_ukur', 2026)->first();
         $this->assertEquals(82.0, $p2->tinggi_cm);
         $this->assertEquals(10.5, $p2->berat_kg);
     }
@@ -228,7 +239,7 @@ class PeriodPengukuranSawTest extends TestCase
             'tahun_ukur' => 2026,
         ]);
 
-        $this->assertDatabaseMissing('hasil_saws', [
+        $this->assertDatabaseMissing('hasil_saw', [
             'anak_id' => $anak->id,
             'bulan_ukur' => 9,
             'tahun_ukur' => 2026,

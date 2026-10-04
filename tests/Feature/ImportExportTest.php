@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Anak;
+use App\Models\HasilSaw;
+use App\Models\Pengukuran;
 use App\Models\Posyandu;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -299,9 +301,30 @@ class ImportExportTest extends TestCase
             'status_aktif' => true,
         ]);
 
-        \App\Models\HasilSaw::create([
+        $pStunting = Pengukuran::create([
+            'anak_id' => $anakStunting->id,
+            'tanggal_ukur' => '2026-10-01',
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'usia_bulan' => 24,
+            'tinggi_cm' => 78.0,
+            'berat_kg' => 9.5,
+        ]);
+
+        $pNormal = Pengukuran::create([
+            'anak_id' => $anakNormal->id,
+            'tanggal_ukur' => '2026-10-01',
+            'bulan_ukur' => 10,
+            'tahun_ukur' => 2026,
+            'usia_bulan' => 24,
+            'tinggi_cm' => 88.0,
+            'berat_kg' => 12.5,
+        ]);
+
+        HasilSaw::create([
             'anak_id' => $anakStunting->id,
             'posyandu_id' => $this->posyanduA->id,
+            'pengukuran_id' => $pStunting->id,
             'bulan_ukur' => 10,
             'tahun_ukur' => 2026,
             'z_tbu' => -2.85,
@@ -320,9 +343,10 @@ class ImportExportTest extends TestCase
             'dihitung_pada' => now(),
         ]);
 
-        \App\Models\HasilSaw::create([
+        HasilSaw::create([
             'anak_id' => $anakNormal->id,
             'posyandu_id' => $this->posyanduA->id,
+            'pengukuran_id' => $pNormal->id,
             'bulan_ukur' => 10,
             'tahun_ukur' => 2026,
             'z_tbu' => -0.50,

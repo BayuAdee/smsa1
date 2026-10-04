@@ -9,7 +9,7 @@ for ($m = 0; $m <= 60; $m++) {
     $l_tbu_l = 1.0;
     $m_tbu_l = round(49.8842 + 3.15 * sqrt($m) + 0.64 * $m - 0.0032 * pow($m, 1.8) / 10, 2);
     $s_tbu_l = round(0.038 - 0.0001 * $m, 4);
-    
+
     // 2. TBU Perempuan
     $l_tbu_p = 1.0;
     $m_tbu_p = round(49.1477 + 3.08 * sqrt($m) + 0.63 * $m - 0.0032 * pow($m, 1.8) / 10, 2);
@@ -33,24 +33,25 @@ for ($m = 0; $m <= 60; $m++) {
     ];
 
     foreach ($configs as $cfg) {
-        list($ind, $jk, $age, $l, $med, $s) = $cfg;
-        $calcSd = function($z) use ($l, $med, $s) {
+        [$ind, $jk, $age, $l, $med, $s] = $cfg;
+        $calcSd = function ($z) use ($l, $med, $s) {
             if ($l != 0) {
                 return round($med * pow(1 + $z * $l * $s, 1 / $l), 2);
             }
+
             return round($med * exp($z * $s), 2);
         };
 
         $rows[] = [
             $ind, $jk, $age, $l, $med, $s,
-            $calcSd(-3), $calcSd(-2), $calcSd(-1), $med, $calcSd(1), $calcSd(2), $calcSd(3)
+            $calcSd(-3), $calcSd(-2), $calcSd(-1), $med, $calcSd(1), $calcSd(2), $calcSd(3),
         ];
     }
 }
 
-$fp = fopen(__DIR__ . '/zscore_references.csv', 'w');
+$fp = fopen(__DIR__.'/zscore_references.csv', 'w');
 foreach ($rows as $row) {
     fputcsv($fp, $row);
 }
 fclose($fp);
-echo "Successfully generated zscore_references.csv with " . (count($rows) - 1) . " rows.\n";
+echo 'Successfully generated zscore_references.csv with '.(count($rows) - 1)." rows.\n";

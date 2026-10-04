@@ -11,6 +11,7 @@ use App\Http\Controllers\PengukuranController;
 use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\SettingSpkController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,7 +93,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import-export/preview', [ImportExportController::class, 'previewImport'])->name('import-export.preview');
     Route::post('/import-export/execute', [ImportExportController::class, 'executeImport'])->name('import-export.execute');
     Route::get('/import-export/export', [ImportExportController::class, 'export'])->name('import-export.export');
+
+    // Pengaturan Parameter SPK SAW (Khusus Bidan Desa)
+    Route::get('/pengaturan/spk', [SettingSpkController::class, 'index'])->name('settings.spk.index');
+    Route::put('/pengaturan/spk', [SettingSpkController::class, 'update'])->name('settings.spk.update');
+    Route::post('/pengaturan/spk/reset', [SettingSpkController::class, 'resetDefault'])->name('settings.spk.reset');
 }
-
-
 );

@@ -2,18 +2,20 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Posyandu;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 class KaderCrudTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $bidan;
+
     protected $kader;
+
     protected $posyandu;
 
     protected function setUp(): void
