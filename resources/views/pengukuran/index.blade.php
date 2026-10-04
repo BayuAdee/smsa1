@@ -11,7 +11,7 @@
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl dark:shadow-black/40 space-y-4 transition-colors duration-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Posyandu Session</span>
+                <!-- <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Posyandu Session</span> -->
                 <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5">Input Pengukuran Fisik Bulanan</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pilih periode pengukuran untuk mencatat data tinggi & berat badan balita.</p>
             </div>
@@ -211,7 +211,7 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
             <div>
-                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Modal Input Fast UI</span>
+                <!-- <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Modal Input Fast UI</span> -->
                 <h3 id="modal_anak_nama" class="text-lg font-black text-slate-900 dark:text-white">Nama Balita</h3>
                 <p id="modal_sub" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Periode: {{ \Carbon\Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->translatedFormat('F Y') }}</p>
             </div>
