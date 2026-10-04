@@ -243,7 +243,7 @@
                 <th>NIK</th>
                 <th>Usia</th>
                 <th>TB / BB</th>
-                <th>Z-Score TB/U (C1)</th>
+                <th>Z-Score TB/U</th>
                 <th>Status Stunting</th>
                 <th>Nilai V (SAW)</th>
                 <th>Kategori Risiko</th>
