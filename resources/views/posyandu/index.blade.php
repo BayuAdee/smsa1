@@ -24,24 +24,6 @@
         @endif
     </div>
 
-
-
-    @if($errors->any())
-        <div class="p-4 rounded-2xl bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs font-bold space-y-1">
-            <div class="flex items-center gap-2 font-black">
-                <svg class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Terjadi Kesalahan Validasi:</span>
-            </div>
-            <ul class="list-disc list-inside pl-7 text-[11px]">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <!-- Posyandu Cards Grid (Non-aktif ditaruh di bawah) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($posyandus as $pos)

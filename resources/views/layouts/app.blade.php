@@ -263,28 +263,34 @@
 
             <!-- Scrollable Content Body -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
-                <!-- Inline Form Validation Errors ($errors) -->
-                @if($errors->any())
-                    <div class="alert-auto-dismiss p-4 bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-800 dark:text-rose-200 text-sm flex items-start justify-between gap-3 shadow-lg transition-all duration-300 mb-6">
-                        <div>
-                            <div class="font-bold mb-1">Periksa kembali data inputan:</div>
-                            <ul class="list-disc list-inside space-y-0.5 text-xs">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <button type="button" onclick="dismissAlert(this.closest('.alert-auto-dismiss'))" class="text-rose-600 dark:text-rose-400 hover:text-rose-900 dark:hover:text-white p-1 text-xs font-bold shrink-0">✕</button>
-                    </div>
-                @endif
-
                 @yield('content')
             </main>
         </div>
     </div>
 
-    <!-- Floating Toast Notification Overlay (CRUD Actions) -->
+    <!-- Floating Toast Notification Overlay (CRUD Actions & Validations) -->
     <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3 max-w-md w-full pointer-events-none px-4 sm:px-0">
+        @if($errors->any())
+            <div class="toast-item pointer-events-auto p-4 bg-white/95 dark:bg-slate-900/95 border border-rose-500/30 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl backdrop-blur-md flex items-start justify-between gap-3 transition-all duration-300 transform translate-x-0 opacity-100">
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-[10px] text-rose-600 dark:text-rose-400 uppercase tracking-wider">Periksa Kembali Inputan</div>
+                        <ul class="list-disc list-inside space-y-0.5 text-xs font-semibold text-slate-900 dark:text-white mt-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissToast(this.closest('.toast-item'))" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-xs font-bold shrink-0 rounded-lg">✕</button>
+            </div>
+        @endif
+
         @if(session('success'))
             <div class="toast-item pointer-events-auto p-4 bg-white/95 dark:bg-slate-900/95 border border-emerald-500/30 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transition-all duration-300 transform translate-x-0 opacity-100">
                 <div class="flex items-center gap-3">
